@@ -1,14 +1,14 @@
-int main(void) {
+int main ( int y, int yes)  {
     int x;
-    x = 6;
-    y = 7;
-    int ajifojdf;
-    y = x + 23;
-    int a[23];
-    if (x < 1) 
-        y = 2 - 3;
-        
-    a[23] = 23 != 22;
+    int a[25];
+    sdfsdx = 5;
+    if (x > 5) {
+        printf(x + 5);
+    }
+    a[11] = y;
 
-    return 100;
+    while (x == y + 2) 
+        y;
+
+    return a[11]  - 6;
 }

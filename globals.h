@@ -3,7 +3,7 @@
 
 // DEBUG
 
-#define TraceScan false
+const bool TraceScan = true;
 
 
 
@@ -12,9 +12,13 @@
 #include <string>
 #include <cstdarg>
 #include <vector>
+#include <sstream>
+#include <iostream>
+
 #define ENDFILE 0
 //#include "parser.tab.h"
 using namespace std;
+const int BUFSIZE = 256;
 
 // node types
 typedef  enum {Stmt, Expr, Decl} NodeType;
@@ -29,16 +33,16 @@ typedef enum {Ge, Le, Gt, Lt, Eq, Ne, Plus, Minus, Times, Divide} OpKind;
 
 
 // this will be used to accept values from lex
-class Value {
-public:
-    union {
-        string id;
-        // for num
-        int intval;
-        OpKind op;
-        TypeKind type;
-    };
-};
+//class Value {
+//public:
+//    union {
+//        string id;
+//        // for num
+//        int intval;
+//        OpKind op;
+//        TypeKind type;
+//    };
+//};
 
 //class IntValue : public Value {
 //    IntValue(int i) : intval(i) {}
@@ -66,10 +70,8 @@ public:
     } subtype;
 
     // necessary since some rules will return a list
-    Node * next;
-    Node * parent;
+    Node * next = nullptr;
     vector<Node *> children;
-    int lineno;
 
     // methods
     Node(NodeType type) : nodetype(type) {}
@@ -77,6 +79,8 @@ public:
     void add_child(Node * node) {
         children.push_back(node);
     }
+
+    virtual string str();
 
 };
 
@@ -111,6 +115,7 @@ public:
     int num = 0;
     VarDeclNode(TypeKind kind, const string & id, bool is_array=false, int num=0)
             : DeclNode(Var), kind(kind), id(id), is_array(is_array), num(num) {}
+    virtual string str();
 };
 
 
@@ -124,6 +129,7 @@ public:
         this->add_child(param);
         this->add_child(stmt);
     }
+    virtual string str();
 
 };
 
@@ -142,6 +148,8 @@ public:
             this->add_child(else_stmt);
         }
     }
+
+    virtual string str();
 };
 
 class IterStmtNode : public StmtNode {
@@ -155,6 +163,7 @@ public:
         this->add_child(cond);
         this->add_child(stmt);
     }
+    virtual string str();
 };
 
 class ReturnStmtNode : public StmtNode {
@@ -166,6 +175,7 @@ public:
     ReturnStmtNode(Node * expr) : StmtNode(Return) {
         this->add_child(expr);
     }
+    virtual string str();
 };
 
 class CompoundStmtNode : public StmtNode {
@@ -179,6 +189,8 @@ public:
         this->add_child(decl);
         this->add_child(stmt);
     }
+
+    virtual string str();
 };
 
 class ExprStmtNode : public StmtNode {
@@ -191,6 +203,8 @@ public:
         if (expr != nullptr)
             this->add_child(expr);
     }
+
+    virtual string str();
 };
 
 class AssignExprNode : public ExprNode {
@@ -203,6 +217,8 @@ public:
         this->add_child(id);
         this->add_child(expr);
     }
+
+    virtual string str();
 };
 
 class CallExprNode : public ExprNode {
@@ -215,6 +231,8 @@ public:
         this->id = id;
         this->add_child(params);
     }
+
+    virtual string str();
 };
 
 class OpExprNode : public ExprNode {
@@ -229,12 +247,15 @@ public:
         this->add_child(exp1);
         this->add_child(exp2);
     }
+
+    virtual string str();
 };
 
 class ConstExprNode : public ExprNode {
 public:
     int value;
     ConstExprNode(int value) : ExprNode(Const), value(value) {}
+    virtual string str();
 };
 
 class IdExprNode : public ExprNode {
@@ -247,6 +268,8 @@ public:
             this->children.push_back(index);
         }
     }
+
+    virtual string str();
 };
 
 #endif //C_MINUS_COMPILER_GLOBALS_H

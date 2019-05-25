@@ -2,12 +2,15 @@
 
 #include "globals.h"
 #include "util.h"
+#include "parser.h"
 
+using namespace std;
 static Node * parse_tree;
 extern "C"
 {
         int yyparse(void);
         int yylex(void);
+        extern int yylineno;
 }
 void yyerror(char * msg);
 
@@ -15,6 +18,7 @@ void yyerror(char * msg);
 
 %code requires {
 	#include "globals.h"
+	#include <string>
 }
 
 
@@ -237,5 +241,10 @@ arg_list:
 %%
 
 void yyerror(char * msg) {
-	fprintf(stderr, "%s", msg);
+	fprintf(stderr, "line %d: %s", yylineno, msg);
+}
+
+Node * parse() {
+	yyparse();
+	return parse_tree;
 }

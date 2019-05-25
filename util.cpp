@@ -39,3 +39,33 @@ string print_token(int token, const std::string & text)
     }
 }
 
+void print_tree(Node * tree, int level) {
+    string indent = string(level * 2, ' ');
+    for (Node * node = tree; node != nullptr; node = node->next) {
+        cout << indent << node->str() << endl;
+        for (const auto & x: node->children) {
+            print_tree(x, level + 1);
+        }
+    }
+}
+
+string print_type(TypeKind type) {
+    switch (type) {
+        case Int: return "int";
+        case Void: return "void";
+    }
+}
+string print_op(OpKind op) {
+    switch (op) {
+        case Eq: return "==";
+        case Ne: return "!=";
+        case Ge: return ">=";
+        case Le: return "<=";
+        case Gt: return ">";
+        case Lt: return "<";
+        case Plus: return "+";
+        case Minus: return "-";
+        case Times: return "*";
+        case Divide: return "/";
+    }
+}

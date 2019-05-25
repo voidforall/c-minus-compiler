@@ -47,7 +47,12 @@ whitespace [ \t\n]+
 "{"         { return '{'; }
 "}"         { return '}'; }
 
-{id}    { yylval.id = yytext; return ID;}
+{id}    {
+	char * text = new char[BUFSIZE];
+	strcpy(text, yytext);
+	yylval.id = text;
+	return ID;
+}
 {num}   { yylval.intval = atoi(yytext); return NUM; }
 {whitespace}    ;
 . yyerror("invalid character\n");
