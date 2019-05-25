@@ -3,9 +3,20 @@
 #include "globals.h"
 #include "util.h"
 
-static parse_tree;
+static Node * parse_tree;
+extern "C"
+{
+        int yyparse(void);
+        int yylex(void);
+}
+void yyerror(char * msg);
 
 %}
+
+%code requires {
+	#include "globals.h"
+}
+
 
 %union{
 	class Node * node;
@@ -32,13 +43,15 @@ static parse_tree;
 %type <node> args arg_list
 
 %left '+' '-' '*' '/' '<' '>'
+%nonassoc IFX
+%nonassoc ELSE
 
 %start program
 
 %%
 
 program:
-	declaration_list {parse_tree = $1}
+	declaration_list {parse_tree = $1; }
 	;
 
 
@@ -46,7 +59,7 @@ declaration_list:
 	declaration_list declaration {
 		// here declaration returns a list
 		Node * node = find_tail($1);
-		node.next = $2;
+		node->next = $2;
 		$$ = $1;
 	}
 	| declaration { $$ = $1; }
@@ -69,7 +82,7 @@ type_specifier:
 
 fun_declaration:
 	type_specifier ID '(' params ')' compound_stmt {
-		Node * node = new FunDecl($1, $2, $4, $6);
+		Node * node = new FunDeclNode($1, $2, $4, $6);
 		$$ = node;
 	}
 	;
@@ -82,7 +95,7 @@ params:
 param_list:
 	param_list ',' param {
 		Node * node = find_tail($1);
-		node.next = $3;
+		node->next = $3;
 		$$ = node;
 	}
 	| param { $$ = $1; }
@@ -94,7 +107,7 @@ param:
 	;
 
 compound_stmt:
- 	'{' local_declarations stmt_list '}' { $$ = new CompoundStmt($2, $3); }
+ 	'{' local_declarations stmt_list '}' { $$ = new CompoundStmtNode($2, $3); }
 	;
 
 local_declarations:
@@ -103,7 +116,7 @@ local_declarations:
  	    if (node == nullptr) {
  	        $$ = $2;
  	    } else {
- 	        node.next = $2;
+ 	        node->next = $2;
  	        $$ = node;
  	    }
  	}
@@ -116,7 +129,7 @@ stmt_list:
  	    if (node == nullptr) {
  	        $$ = $2;
  	    } else {
- 	        node.next = $2;
+ 	        node->next = $2;
  	        $$ = node;
  	    }
 	}
@@ -133,11 +146,11 @@ stmt:
 
 expr_stmt:
  	expr ';' { $$ = new ExprStmtNode($1); }
-	| ';' { $$ = $1; }
+	| ';' { $$ = new ExprStmtNode(nullptr); }
 	;
 
 selection_stmt:
- 	IF '(' expr ')' stmt { $$ = new IfStmtNode($3, $5); }
+ 	IF '(' expr ')' stmt %prec IFX { $$ = new IfStmtNode($3, $5); }
 	| IF '(' expr ')' stmt ELSE stmt { $$ = new IfStmtNode($3, $5, true, $7); }
 	;
 
@@ -147,7 +160,7 @@ iteration_stmt:
 
 return_stmt:
  	RETURN ';' { $$ = new ReturnStmtNode(nullptr); }
-	| RETURN expr ';' { $$ = new ReturnStmtNode($1); }
+	| RETURN expr ';' { $$ = new ReturnStmtNode($2); }
 	;
 
 expr:
@@ -162,7 +175,7 @@ var:
 
 simple_expr:
 	additive_expr relop additive_expr {
-		$$ = new OpExprNode($2, $1, $3);)
+		$$ = new OpExprNode($2, $1, $3);
 	}
 	| additive_expr { $$ = $1; }
 	;
@@ -177,7 +190,7 @@ relop:
 	;
 
 additive_expr:
-	additive_expr addop term { $$ = new OpExprNode($2, $1, $2); }
+	additive_expr addop term { $$ = new OpExprNode($2, $1, $3); }
 	| term { $$ = $1; }
 	;
 
@@ -204,7 +217,7 @@ factor:
 	;
 
 call:
-	ID '(' args ')' { $$ = new CallExprNode($1, $2);}
+	ID '(' args ')' { $$ = new CallExprNode($1, $3);}
 	;
 
 args:
@@ -215,8 +228,14 @@ args:
 arg_list:
 	arg_list ',' expr {
 		Node * node = find_tail($1);
-		node.next = $3;
+		node->next = $3;
 		$$ = node;
 	}
 	| expr { $$ = $1; }
 	;
+
+%%
+
+void yyerror(char * msg) {
+	fprintf(stderr, "%s", msg);
+}

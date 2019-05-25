@@ -1,13 +1,20 @@
 #ifndef C_MINUS_COMPILER_GLOBALS_H
 #define C_MINUS_COMPILER_GLOBALS_H
 
+// DEBUG
+
+#define TraceScan false
+
+
+
 #include <cstdio>
 #include <cstdlib>
 #include <string>
 #include <cstdarg>
 #include <vector>
+#define ENDFILE 0
+//#include "parser.tab.h"
 using namespace std;
-
 
 // node types
 typedef  enum {Stmt, Expr, Decl} NodeType;
@@ -18,22 +25,36 @@ typedef enum {Assign, Call, Op, Const, Id} ExprType;
 // global type specifier
 typedef enum {Int, Void} TypeKind;
 // global operation specifier
-typedef enum {Ge, Le, Gt, Lt, Eq, Nq, Plus, Minus, Times, Divide} OpKind;
+typedef enum {Ge, Le, Gt, Lt, Eq, Ne, Plus, Minus, Times, Divide} OpKind;
 
 
 // this will be used to accept values from lex
-//class Value {
-//public:
-//    string id;
-//    // for num
-//    int intval;
-//    int lineno;
-//
-//    Value() {}
-//    Value(int lineno, const string & id) : lineno(lineno), id(id) {}
-//    Value(int lineno, int intval) : lineno(lineno), intval(intval) {}
-//};
+class Value {
+public:
+    union {
+        string id;
+        // for num
+        int intval;
+        OpKind op;
+        TypeKind type;
+    };
+};
 
+//class IntValue : public Value {
+//    IntValue(int i) : intval(i) {}
+//};
+//
+//class IdValue : public Value {
+//    IdValue(const string & id) : id(id) {}
+//};
+//
+//class OpValue : public Value {
+//    OpValue(OpKind op) : op(op) {}
+//};
+//
+//class TypeValue : public Value {
+//    OpValue(TypeKind type) : type(type) {}
+//};
 class Node {
 public:
     // data members
@@ -107,6 +128,7 @@ public:
 };
 
 class IfStmtNode : public StmtNode {
+public:
     /*
      * Two nodes:
      * - cond: ExprNode
@@ -123,6 +145,7 @@ class IfStmtNode : public StmtNode {
 };
 
 class IterStmtNode : public StmtNode {
+public:
     /*
      * Two nodes:
      * - cond: ExprNode
@@ -135,6 +158,7 @@ class IterStmtNode : public StmtNode {
 };
 
 class ReturnStmtNode : public StmtNode {
+public:
     /*
      * One node:
      * - expr: ExprNode
@@ -145,6 +169,7 @@ class ReturnStmtNode : public StmtNode {
 };
 
 class CompoundStmtNode : public StmtNode {
+public:
     /*
      * Two nodes:
      * - decl: a list of DeclNode
@@ -157,6 +182,7 @@ class CompoundStmtNode : public StmtNode {
 };
 
 class ExprStmtNode : public StmtNode {
+public:
     /*
      * Two nodes:
      * - expr: a ExprNode. Can be empty.
@@ -168,17 +194,19 @@ class ExprStmtNode : public StmtNode {
 };
 
 class AssignExprNode : public ExprNode {
+public:
     /*
+     *  id: VarExprNode
      *  expr: ExprNode
      */
-    string id;
-    AssignExprNode(const string & id, Node * expr) : ExprNode(Assign) {
-        this->id = id;
+    AssignExprNode(Node * id, Node * expr) : ExprNode(Assign) {
+        this->add_child(id);
         this->add_child(expr);
     }
 };
 
 class CallExprNode : public ExprNode {
+public:
     /*
      * params: a list of Expr. Note this has to match parameters.
      */
@@ -190,6 +218,7 @@ class CallExprNode : public ExprNode {
 };
 
 class OpExprNode : public ExprNode {
+public:
     /*
      * exp1: ExprNode
      * exp2: ExprNode
@@ -203,11 +232,13 @@ class OpExprNode : public ExprNode {
 };
 
 class ConstExprNode : public ExprNode {
+public:
     int value;
     ConstExprNode(int value) : ExprNode(Const), value(value) {}
 };
 
 class IdExprNode : public ExprNode {
+public:
     string id;
     bool has_index = false;
     IdExprNode(const string & id, bool has_index=false, Node * index=nullptr) : ExprNode(Id), id(id) {
