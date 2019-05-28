@@ -3,4 +3,4 @@ project(C_minus_compiler)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(C_minus_compiler main.cpp globals.h util.cpp util.h lexer.h parser.h globals.cpp)
+add_executable(C_minus_compiler main.cpp globals.h util.cpp util.h lexer.h parser.h globals.cpp symtab.h symtab.cpp analyze.h analyze.cpp)

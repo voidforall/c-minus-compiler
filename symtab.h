@@ -1,4 +1,3 @@
-#pragma once
 /* symbol table in semantic analysis */
 // reference: https://github.com/ejacky/tiny/blob/master/SYMTAB.H tiny code in Compiler Construction: Principles and Practice
 
@@ -8,12 +7,15 @@
 #include <string>
 #include <vector>
 #include "globals.h"
+using namespace std;
 
 #define HASH_TABLE_SIZE 571 // size of hash table, just a prime
 
 /* The record in the bucket lists for each identifier,
 *
 */
+class Node; /* pre-declaration when two header file include each other */
+
 class BucketListRec {
 public:
 	// data members

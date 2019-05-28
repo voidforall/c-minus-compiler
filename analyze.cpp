@@ -4,6 +4,8 @@
 #include "symtab.h"
 #include "analyze.h"
 
+using namespace std;
+
 extern FILE *listing; 
 static bool Error = false;
 static int location = 0; // allocation of memory location
@@ -40,6 +42,11 @@ static void nullProc(Node * t){
 	else return;
 }
 
+/* output the error message(lineno, error message...) */
+static void typeError(Node *node, string message) {
+	fprintf(listing, "Error in Line[%d]: %s\n", node->lineno, message);
+	Error = true; // static error signal in analysis
+}
 
 /* insertNode inserts t's identifier into the symbol table */
 static void insertNode(Node * t) {
@@ -67,6 +74,7 @@ static void insertNode(Node * t) {
 		switch (t->subtype.expr)
 		{
 		case Id:
+		{
 			IdExprNode *idNode = dynamic_cast<IdExprNode*>(t);
 			if (st_lookup(sc_top(), idNode->id) < 0) {
 				typeError(t, "undeclared variable");
@@ -76,8 +84,9 @@ static void insertNode(Node * t) {
 				st_insert(idNode->id, idNode->lineno, NULL, t);
 			}
 			break;
-
+		}
 		case Call:
+		{
 			CallExprNode * callNode = dynamic_cast<CallExprNode*>(t);
 			if (st_lookup(sc_top(), callNode->id) < 0) {
 				typeError(t, "undeclared function");
@@ -86,6 +95,7 @@ static void insertNode(Node * t) {
 				st_insert(callNode->id, callNode->lineno, NULL, t);
 			}
 			break;
+		}
 		default:
 			break;
 		}
@@ -95,6 +105,7 @@ static void insertNode(Node * t) {
 		switch (t->subtype.decl)
 		{
 		case Var:
+		{
 			VarDeclNode * varNode = dynamic_cast<VarDeclNode*>(t);
 
 			if (varNode->kind == Void) {
@@ -108,8 +119,9 @@ static void insertNode(Node * t) {
 				typeError(t, "the variable has been declared in the current scope");
 			}
 			break;
-
+		}
 		case Fun:
+		{
 			// declaration of function will create a new scope for it
 			FunDeclNode * funNode = dynamic_cast<FunDeclNode*>(t);
 
@@ -123,6 +135,7 @@ static void insertNode(Node * t) {
 			t->scope = sc_top();
 			preserveLastScope = true;
 			analyzingFuncName = funNode->id;
+		}
 		default:
 			break;
 		}
@@ -234,7 +247,7 @@ static void checkNode(Node *t) {
 
 			BucketList l = st_lookup_list(sc_top(), funcName);
 			for (int i = 0; i < l.size(); i++) {
-				if (l[i].id == funcName && l[i].nodetype == Decl && l[i].subtype.decl == Fun) {
+				if (l[i].id == funcName && l[i].node->nodetype == Decl && l[i].node->subtype.decl == Fun) {
 					callDeclNode = dynamic_cast<FunDeclNode*>(l[i].node);
 				}
 			}
@@ -328,10 +341,11 @@ static void checkNode(Node *t) {
 		}
 
 		case Const:
+		{
 			ExprNode * exprT = dynamic_cast<ExprNode*>(t);
 			exprT->kind = Int;
 			break;
-
+		}
 		default:
 			break;
 		}
@@ -392,13 +406,6 @@ void typeCheck(Node * syntaxTree)
 	sc_push(global);
 	traverse(syntaxTree,pushScope ,checkNode);
 	sc_pop();
-}
-
-
-/* output the error message(lineno, error message...) */
-static void typeError(Node *node, string message) {
-	fprintf(listing, "Error in Line[%d]: %s\n", node->lineno, message);
-	Error = true; // static error signal in analysis
 }
 
 

@@ -133,7 +133,7 @@ BucketList st_lookup_list(Scope s, string id)
 		}
 		s = s->parentScope; // nearest principle of scope
 	}
-	return nullptr;
+	return list;
 }
 
 /* invoked in printSymTab, presenting the information of one identifier */
