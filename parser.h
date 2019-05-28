@@ -5,6 +5,7 @@
 #ifndef C_MINUS_COMPILER_PARSER_H
 #define C_MINUS_COMPILER_PARSER_H
 #include "globals.h"
+#include "symtab.h"
 
 Node* parse();
 

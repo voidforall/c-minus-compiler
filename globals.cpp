@@ -4,6 +4,14 @@
 #include "globals.h"
 #include "util.h"
 
+extern "C" {
+	extern int yylineno;
+}
+
+Node::Node(NodeType type) : nodetype(type) {
+	lineno = yylineno;
+}
+
 string AssignExprNode::str() {
     return "Assign";
 }

@@ -15,9 +15,10 @@ const bool TraceAnalyze = true; // trace the symbol table
 #include <sstream>
 #include <iostream>
 #include "symtab.h"
+#include "parser.h"
 
 #define ENDFILE 0
-//#include "parser.tab.h"
+// #include "parser.tab.h"
 using namespace std;
 const int BUFSIZE = 256;
 
@@ -61,9 +62,6 @@ typedef enum { Ge, Le, Gt, Lt, Eq, Ne, Plus, Minus, Times, Divide } OpKind;
 //    OpValue(TypeKind type) : type(type) {}
 //};
 
-extern "C" {
-	int yylineno;
-}
 
 class Node {
 public:
@@ -82,10 +80,7 @@ public:
 	Scope scope = nullptr;
 
 	// methods
-	Node(NodeType type) : nodetype(type) {
-		lineno = yylineno;
-	}
-
+	Node(NodeType type);
 	void add_child(Node * node) {
 		children.push_back(node);
 	}
