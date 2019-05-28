@@ -134,7 +134,7 @@ stmt_list:
  	        $$ = $2;
  	    } else {
  	        node->next = $2;
- 	        $$ = node;
+ 	        $$ = $1;
  	    }
 	}
 	| { $$ = nullptr; }
