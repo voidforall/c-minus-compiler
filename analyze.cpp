@@ -68,6 +68,7 @@ static void insertNode(Node * t) {
 		default:
 			break;
 		}
+		break;
 
 	// add lineno when node is IdExprNode/CallExprNode
 	case Expr:
@@ -99,6 +100,7 @@ static void insertNode(Node * t) {
 		default:
 			break;
 		}
+		break;
 
 	// Declaration: int a = 0; int b[10]; int gcd(int u, int v);
 	case Decl:
@@ -135,10 +137,13 @@ static void insertNode(Node * t) {
 			t->scope = sc_top();
 			preserveLastScope = true;
 			analyzingFuncName = funNode->id;
+			break;
 		}
 		default:
 			break;
 		}
+		break;
+
 	default:
 		// not likely happen unless parsing not correctly
 		cout << "[Analyze.InsertNode] Error: No explicit type of the node." << endl;

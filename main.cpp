@@ -1,5 +1,4 @@
 #include <iostream>
-#include <unistd.h>
 #include "lexer.h"
 #include "parser.tab.h"
 #include "globals.h"
@@ -10,15 +9,18 @@
 extern "C"{
     int yylex();
 }
+extern FILE *yyin;
 using namespace std;
 
 FILE *listing = stdout;
 
 int main(void)
 {
+    // fopen_s(&yyin, "../test.c", "r+");
     Node * tree = parse();
 
-    print_tree(tree);    buildTable(tree);
+    print_tree(tree);
+    buildTable(tree);
 //    int token = -1;
 //    while (token != ENDFILE) {
 //        token = get_token();

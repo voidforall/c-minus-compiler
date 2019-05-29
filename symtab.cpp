@@ -55,7 +55,7 @@ Scope sc_top()
 
 void sc_push(Scope scope)
 {
-	scopeStack[nScopeStack] = scope;
+	scopeStack[nScopeStack++] = scope;
 }
 
 void sc_pop()
@@ -154,11 +154,11 @@ void printIdentifier(FILE * listing, BucketList *hTable)
 		l = hTable[idx];
 		for (int i = 0; i < l.size(); i++) {
 			node = l[i].node;
-			fprintf(listing, "%-12s", l[i].id);
+			fprintf(listing, "%-12s", l[i].id.c_str());
 			if (node->subtype.decl == Var) {
 				varNode = dynamic_cast<VarDeclNode*>(node);
 				if (varNode->is_array == true) {
-					fprintf(listing, "Array    ");
+					fprintf(listing, "Array       ");
 					dataType = varNode->kind;
 				}
 				else {
@@ -203,7 +203,8 @@ void printSymTab(FILE * listing) {
 		BucketList *hashTable = scope->hashTable;
 
 		// print scope name: global/function name
-		fprintf(listing, "Scope Name: %s ", scope->scopeName);
+		fprintf(listing, "Scope Name: %s ", scope->scopeName.c_str());
+
 		// print nested level(global:0, main:1)
 		fprintf(listing, "<nested depth: %d>\n", scope->nestedLevel);
 		
@@ -212,6 +213,7 @@ void printSymTab(FILE * listing) {
 		
 		printIdentifier(listing, hashTable);
 		fprintf(listing, "\n");
+
 	}
 	return; 
 }
