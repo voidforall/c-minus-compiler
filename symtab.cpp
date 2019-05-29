@@ -86,6 +86,25 @@ void st_insert(string id, int lineno, int loc, Node *node) {
 	}
 }
 
+/* Invoked in buildTable -> analyzing IdExprNode */
+void st_insert_nearest(string id, int lineno, int loc, Node *node) {
+	int hashVal = hash_func(id);
+	Scope top = sc_top();
+	BucketList *listPointer = &top->hashTable[hashVal];
+
+	while (top) {
+		listPointer = &top->hashTable[hashVal];
+		for (int i = 0; i < listPointer->size(); i++) {
+			// nearest principle of scope
+			if (id == listPointer->at(i).id) {
+				listPointer->at(i).lines.push_back(lineno);
+				return;
+			}
+		}
+		top = top->parentScope;
+	}
+}
+
 /* Function st_lookup returns the memory
 * location of a variable or -1 if not found
 */

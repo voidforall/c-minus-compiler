@@ -44,7 +44,7 @@ static void nullProc(Node * t){
 
 /* output the error message(lineno, error message...) */
 static void typeError(Node *node, string message) {
-	fprintf(listing, "Error in Line[%d]: %s\n", node->lineno, message);
+	fprintf(listing, "Error in Line[%d]: %s\n", node->lineno, message.c_str());
 	Error = true; // static error signal in analysis
 }
 
@@ -82,7 +82,13 @@ static void insertNode(Node * t) {
 			}
 			else {
 				/* NULL in loc field means add in lineno field */
-				st_insert(idNode->id, idNode->lineno, NULL, t);
+				if(st_lookup_nonest(sc_top(), idNode->id) < 0){
+					// not in current scope, invoke st_insert_nearest
+					st_insert_nearest(idNode->id, idNode->lineno, NULL, t);
+				}
+				else {
+					st_insert(idNode->id, idNode->lineno, NULL, t);
+				}
 			}
 			break;
 		}
@@ -93,7 +99,7 @@ static void insertNode(Node * t) {
 				typeError(t, "undeclared function");
 			}
 			else {
-				st_insert(callNode->id, callNode->lineno, NULL, t);
+				st_insert_nearest(callNode->id, callNode->lineno, NULL, t);
 			}
 			break;
 		}
@@ -177,6 +183,9 @@ static void checkNode(Node *t) {
 	
 	switch (t->nodetype)
 	{
+	case Decl:
+	    break;
+
 	case Stmt:
 		switch (t->subtype.stmt) {
 		case Compound:
@@ -228,13 +237,13 @@ static void checkNode(Node *t) {
 		switch (t->subtype.expr) {
 		case Assign:
 		{
-			VarDeclNode * idNode = dynamic_cast<VarDeclNode*>(t->children[0]);
+			IdExprNode * idNode = dynamic_cast<IdExprNode*>(t->children[0]);
 			ExprNode *exprNode = dynamic_cast<ExprNode*>(t->children[1]);
 			if (exprNode->kind == Void) {
 				/* some callExpr may return void */
 				typeError(t->children[1], "assignment with invalid type: void");
 			}
-			else if (idNode->is_array == true) {
+			else if (idNode->has_index == true) {
 				typeError(t->children[0], "assignment to an array variable");
 			}
 			else {
@@ -260,6 +269,7 @@ static void checkNode(Node *t) {
 				cout << "[Analyze.checkNode] Error: Function call's identifier cannot find in the symbol table" << endl;
 				break;
 			}
+			callNode->kind = callDeclNode->kind;
 
 			/* check argments type */
 			ExprNode *args = dynamic_cast<ExprNode*>(t->children[0]);
@@ -279,7 +289,7 @@ static void checkNode(Node *t) {
 			/* check the parameter type */
 			for (int i = 0; i < paramNum; i++) {
 				if (args == NULL) {
-					typeError(callDeclNode, "the number of parameters is inconsistent with declaration");
+					typeError(t, "the number of parameters is inconsistent with declaration");
 				}
 				else if (args->kind == Void) {
 					typeError(args, "invalid argument type: void");
@@ -379,14 +389,15 @@ static void pushScope(Node *t) {
 	if (t->nodetype == Decl && t->subtype.decl == Fun) {
 		FunDeclNode *funNode = dynamic_cast<FunDeclNode*>(t);
 		analyzingFuncName = funNode->id;
+		sc_push(funNode->scope);
 	}
-	else if (t->nodetype == Stmt && t->subtype.stmt == Compound) {
+	else if (t->nodetype == Stmt && t->subtype.stmt == Compound && t->scope != NULL) {
 		sc_push(t->scope);
 	}
 }
 
 
-/* invoked as preorder traverse: traverse(syntaxTree, insertNode, null) */
+/* invoked as preorder traverse: traverse(syntaxTree, insertNode, popScope) */
 void buildTable(Node *syntaxTree) {
 	/* initialize: create global scope & input, output */
 	initSymTab();
@@ -405,7 +416,7 @@ void buildTable(Node *syntaxTree) {
 }
 
 
-/* invoked as postorder traverse: traverse(syntaxTree, null, checkNode) */
+/* invoked as postorder traverse: traverse(syntaxTree, pushScope, checkNode) */
 void typeCheck(Node * syntaxTree)
 {
 	sc_push(global);
