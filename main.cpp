@@ -5,6 +5,7 @@
 #include "parser.h"
 #include "analyze.h"
 #include "util.h"
+#include "gencode.h"
 
 extern "C"{
     int yylex();
@@ -20,7 +21,8 @@ int main(void)
     Node * tree = parse();
 
     print_tree(tree);
-    buildTable(tree);
+    cgen(tree);
+//    buildTable(tree);
 //    int token = -1;
 //    while (token != ENDFILE) {
 //        token = get_token();

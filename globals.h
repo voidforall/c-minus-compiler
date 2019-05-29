@@ -14,6 +14,7 @@ const bool TraceAnalyze = true; // trace the symbol table
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <fstream>
 #include "symtab.h"
 #include "parser.h"
 
