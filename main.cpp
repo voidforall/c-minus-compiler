@@ -17,7 +17,7 @@ int main(void)
     Node * tree = parse();
 
 //    print_tree(tree);
-    cgen(tree);
+//    cgen(tree);
     buildTable(tree);
     typeCheck(tree);
 //    int token = -1;
