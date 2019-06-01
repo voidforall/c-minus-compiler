@@ -239,12 +239,31 @@ static void checkNode(Node *t) {
 		{
 			IdExprNode * idNode = dynamic_cast<IdExprNode*>(t->children[0]);
 			ExprNode *exprNode = dynamic_cast<ExprNode*>(t->children[1]);
+			string idName = idNode->id;
+			// fix: error(int a; a[11] = ;) error(int a[11]; a = ;)
+			// need to look up is_array in the Symbol table
+            BucketList idRec = st_lookup_list(sc_top(), idName);
+            VarDeclNode *idDeclNode = nullptr;
+            for (int i = 0; i < idRec.size(); i++) {
+                if (idRec[i].id == idName) {
+                    idDeclNode = dynamic_cast<VarDeclNode*>(idRec[i].node);
+                }
+            }
+            if(idDeclNode == NULL) {
+                typeError(t->children[0], "the variable has not been declared");
+                break;
+            }
+
 			if (exprNode->kind == Void) {
 				/* some callExpr may return void */
 				typeError(t->children[1], "assignment with invalid type: void");
 			}
-			else if (idNode->has_index == true) {
-				typeError(t->children[0], "assignment to an array variable");
+			else if (idNode->has_index == false && idDeclNode->is_array == true) {
+				// typeError(t->children[0], "assignment to an array variable");
+				// has done in Id
+			}
+			else if(idNode->has_index == true && idDeclNode->is_array == false){
+			    typeError(t->children[0], "index of a non-array variable is invalid");
 			}
 			else {
 				ExprNode *exprT = dynamic_cast<ExprNode*>(t);
@@ -336,11 +355,15 @@ static void checkNode(Node *t) {
 			}
 
 			if (idDeclNode == nullptr) {
-				// unlikely invoked
-				cout << "[Analyze.checkNode] Error: Id cannot find in the symbol table" << endl;
+				// cout << t->lineno << endl;
+				// cout << "[Analyze.checkNode] Error: Id cannot find in the symbol table" << endl;
 				break;
 			}
 			if (idDeclNode->is_array) {
+			    if(t->children.size() == 0){
+			        typeError(t, "assignment to an array variable");
+			        break;
+			    }
 				ExprNode *indexNode = dynamic_cast<ExprNode*>(t->children[0]);
 				if (indexNode->kind != Int) {
 					typeError(indexNode, "the index of array should be Int type");
