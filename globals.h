@@ -4,6 +4,7 @@
 // DEBUG
 
 const bool TraceScan = true;
+const bool TraceParse = true;
 const bool TraceAnalyze = true; // trace the symbol table
 
 
@@ -35,34 +36,6 @@ typedef enum { Int, Void, Bool } TypeKind;
 typedef enum { Ge, Le, Gt, Lt, Eq, Ne, Plus, Minus, Times, Divide } OpKind;
 
 
-// this will be used to accept values from lex
-//class Value {
-//public:
-//    union {
-//        string id;
-//        // for num
-//        int intval;
-//        OpKind op;
-//        TypeKind type;
-//    };
-//};
-
-//class IntValue : public Value {
-//    IntValue(int i) : intval(i) {}
-//};
-//
-//class IdValue : public Value {
-//    IdValue(const string & id) : id(id) {}
-//};
-//
-//class OpValue : public Value {
-//    OpValue(OpKind op) : op(op) {}
-//};
-//
-//class TypeValue : public Value {
-//    OpValue(TypeKind type) : type(type) {}
-//};
-
 
 class Node {
 public:
@@ -89,7 +62,6 @@ public:
 	virtual string str();
 
 };
-
 
 
 class DeclNode : public Node {

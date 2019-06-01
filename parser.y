@@ -240,11 +240,18 @@ arg_list:
 
 %%
 
+extern FILE * listing;
+
 void yyerror(char * msg) {
 	fprintf(stderr, "line %d: %s", yylineno, msg);
 }
 
 Node * parse() {
 	yyparse();
+	if (TraceParse) {
+		fprintf(listing, "[TraceParse]: syntax tree:\n");
+		print_tree(parse_tree);
+	}
+	
 	return parse_tree;
 }

@@ -5,6 +5,8 @@
 #include <string>
 #include <sstream>
 
+extern FILE * listing;
+
 Node * find_tail(Node * node) {
     if (node != nullptr) {
         while (node->next != nullptr) {
@@ -43,7 +45,9 @@ string print_token(int token, const std::string & text)
 void print_tree(Node * tree, int level) {
     string indent = string(level * 2, ' ');
     for (Node * node = tree; node != nullptr; node = node->next) {
-        cout << indent << node->str() << endl;
+//        cout << indent << node->str() << endl;
+        string line = indent + node->str() + "\n";
+        fprintf(listing, line.c_str());
         for (const auto & x: node->children) {
             print_tree(x, level + 1);
         }

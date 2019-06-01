@@ -3,6 +3,9 @@ cmake-build-debug
 .idea
 log.txt
 lex.yy.c
+lex.yy.cpp
+parser.tab.cpp
 parser.tab.c
 parser.tab.h
 parser
+result.tac
