@@ -22,6 +22,10 @@ int add(int u, int v){
 int main ( int y, int yes)  {
     int x;
     int a[25];
+    int b;
+
+    a = 5;
+    b[1] = 1;
     add(1);
     while(fuck(x)){
         x = 2 * x;
