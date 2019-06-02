@@ -3,9 +3,6 @@
 
 // DEBUG
 
-const bool TraceScan = true;
-const bool TraceParse = true;
-const bool TraceAnalyze = true; // trace the symbol table
 
 
 #include <cstdio>
@@ -19,11 +16,17 @@ const bool TraceAnalyze = true; // trace the symbol table
 #include "symtab.h"
 #include "parser.h"
 #include "code.h"
-#include "gentiny.h"
 
 #define ENDFILE 0
 // #include "parser.tab.h"
 using namespace std;
+
+const bool TraceScan = true;
+const bool TraceParse = true;
+const bool TraceCode = true;
+const bool TraceAnalyze = true; // trace the symbol table
+extern FILE * listing;
+extern FILE * code;
 const int BUFSIZE = 256;
 
 // node types

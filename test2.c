@@ -1,3 +1,4 @@
+int a;
 int Fun(int a) {
 
     int b[10];
@@ -12,3 +13,5 @@ int Fun(int a) {
 
     return 0;
 }
+
+int b;

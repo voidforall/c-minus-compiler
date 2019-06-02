@@ -6,7 +6,8 @@
 
 using namespace std;
 
-extern FILE *listing; 
+extern FILE *listing;
+extern Scope global;
 static bool Error = false;
 static int location = 0; // allocation of memory location
 

@@ -22,9 +22,10 @@ static Scope scopes[MAX_SCOPE_NUM];
 static int nScope = 0;
 static Scope scopeStack[MAX_SCOPE_NUM];
 static int nScopeStack = 0;
-
 static int locAlloc[MAX_SCOPE_NUM];
 
+
+Scope global; // global scope: derive out other scopes
 /* the hash function:
 * h = (a^(n-1)c1 + ... + cn) mod size
 */

@@ -243,7 +243,7 @@ arg_list:
 extern FILE * listing;
 
 void yyerror(char * msg) {
-	fprintf(stderr, "line %d: %s", yylineno, msg);
+	fprintf(stderr, "line %d: %s\n", yylineno, msg);
 }
 
 Node * parse() {
