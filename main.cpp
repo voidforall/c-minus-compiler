@@ -27,8 +27,8 @@ int main(void)
 
 //    print_tree(tree);
 //    cgen(tree);
-//    buildTable(tree);
-//    typeCheck(tree);
+    buildTable(tree);
+    typeCheck(tree);
 
     code = fopen("test.tm", "w");
     gentiny(tree);

@@ -71,7 +71,7 @@ void sc_pop()
 	nScopeStack--;
 }
 
-void st_insert(string id, int lineno, int loc, Node *node) {
+void st_insert(string id, int lineno, int size, Node *node) {
 	int hashVal = hash_func(id);
 	Scope top = sc_top();
 	BucketList *listPointer = &top->hashTable[hashVal];
@@ -85,7 +85,8 @@ void st_insert(string id, int lineno, int loc, Node *node) {
 	}
 
 	if (idx == -1) { /* variable not yet in table */
-		BucketListRec r = BucketListRec(id, node, locAlloc[nScopeStack-1]++);
+		BucketListRec r = BucketListRec(id, node, locAlloc[nScopeStack-1]);
+		locAlloc[nScopeStack - 1] += size;
 		r.lines.push_back(lineno);
 		listPointer->push_back(r);
 	}

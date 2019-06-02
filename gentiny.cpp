@@ -167,6 +167,8 @@ void gentiny_stmt_expr(ExprStmtNode * node, track & track) {
 }
 
 void gentiny_stmt_if(IfStmtNode * node, track & track) {
+    if(TraceCode)
+        emitComment("--> If");
     Node * cond = node->children[0];
     gentiny_expr((ExprNode*)cond, track);
 
@@ -193,9 +195,13 @@ void gentiny_stmt_if(IfStmtNode * node, track & track) {
         emitRM_Abs("JEQ", ac, current_loc, "If false, jump to the end");
         emitRestore();
     }
+    if(TraceCode)
+        emitComment("<-- If");
 }
 
 void gentiny_stmt_iter(IterStmtNode * node, track & track) {
+    if(TraceCode)
+        emitComment("--> While");
     Node * cond = node->children[0];
 
     int loc1 = emitSkip(0);
@@ -210,6 +216,8 @@ void gentiny_stmt_iter(IterStmtNode * node, track & track) {
     emitBackup(loc2);
     emitRM_Abs("JEQ", ac, current_loc, "If false, end loop");
     emitRestore();
+    if(TraceCode)
+        emitComment("<-- While");
 }
 
 void gentiny_stmt_return(ReturnStmtNode * node, track & track) {
@@ -325,10 +333,10 @@ void gentiny_expr_op(OpExprNode * node, track & track) {
 
     // push result value op1 to mp stack: ac->temp[mp--]
     gentiny_expr(op1, track, false);
-    emitRM("ST", ac, frame_offset--, fp, "op: push operand1 to mp");
+    emitRM("ST", ac, --frame_offset, fp, "op: push operand1 to mp");
 
     gentiny_expr(op2, track, false);
-    emitRM("LD", ac1, ++frame_offset, fp, "op: load operand1 from mp");
+    emitRM("LD", ac1, frame_offset++, fp, "op: load operand1 from mp");
 
     // ac: op2 ac1: op1 -> save in ac
     switch(node->op){
@@ -436,10 +444,10 @@ void gentiny_expr_id(IdExprNode * node, track & track, bool isAddress) {
 
         // a local array variable: ac-base address
         Node *index = node->children[0];
-        emitRM("ST", ac, frame_offset--, fp, "ExprId: push base address to mp");
+        emitRM("ST", ac, --frame_offset, fp, "ExprId: push base address to mp");
         gentiny_code(index, track);
 
-        emitRM("LD", ac1, ++frame_offset, fp, "ExprId: load base address to ac1");
+        emitRM("LD", ac1, frame_offset++, fp, "ExprId: load base address to ac1");
         emitRO("SUB", ac, ac1, ac, "ExprId: base address - index = index address");
     }
 
@@ -475,7 +483,11 @@ void gentiny_decl_var(VarDeclNode * node, track & track) {
     // do nothing more than allocate space in current AR
     // this does not harm if this is a global declaration,
     // though there are more consistent ways to do it
-    frame_offset += 1;
+    if (node->is_array) {
+        frame_offset -= node->num;
+    }
+    else
+        frame_offset -= 1;
 
 
     if(TraceCode)
