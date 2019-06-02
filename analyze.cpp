@@ -271,7 +271,7 @@ static void checkNode(Node *t) {
 				typeError(t->children[1], "assignment with invalid type: void");
 			}
 			else if (idNode->has_index == false && idDeclNode->is_array == true) {
-				// typeError(t->children[0], "assignment to an array variable");
+				 typeError(t->children[0], "assignment to an array variable");
 				// has done in Id
 			}
 			else if(idNode->has_index == true && idDeclNode->is_array == false){
@@ -373,7 +373,7 @@ static void checkNode(Node *t) {
 			}
 			if (idDeclNode->is_array) {
 			    if(t->children.size() == 0){
-			        typeError(t, "assignment to an array variable");
+			        // typeError(t, "assignment to an array variable");
 			        break;
 			    }
 				ExprNode *indexNode = dynamic_cast<ExprNode*>(t->children[0]);
