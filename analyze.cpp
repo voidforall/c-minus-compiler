@@ -88,7 +88,7 @@ static void insertNode(Node * t) {
 					st_insert_nearest(idNode->id, idNode->lineno, NULL, t);
 				}
 				else {
-					st_insert(idNode->id, idNode->lineno, NULL, t);
+					st_insert(idNode->id, idNode->lineno, 0, t);
 				}
 			}
 			break;
@@ -122,7 +122,13 @@ static void insertNode(Node * t) {
 				break;
 			}
 			if (st_lookup_nonest(sc_top(), varNode->id) < 0) {
-				st_insert(varNode->id, varNode->lineno, location++ ,t);
+			    int size = 0;
+				if (varNode->is_array) {
+					size = varNode->num;
+				} else {
+					size = 1;
+				}
+				st_insert(varNode->id, varNode->lineno, size ,t);
 			}
 			else {
 				typeError(t, "the variable has been declared in the current scope");
@@ -139,7 +145,7 @@ static void insertNode(Node * t) {
 				break;
 			}
 			/* funtion record in current symbol table but create a new scope*/
-			st_insert(funNode->id, funNode->lineno, location++, t);
+			st_insert(funNode->id, funNode->lineno, 0, t);
 			sc_push(sc_create(funNode->id));
 			t->scope = sc_top();
 			preserveLastScope = true;
@@ -177,8 +183,8 @@ static void initSymTab() {
 	FunDeclNode *outputDecl = new FunDeclNode(Void, "output", param , NULL);
 
 	/* insert the input/output as system call into global, lineno 0*/
-    st_insert("input", 0, location++, inputDecl);
-    st_insert("output", 0,location++, outputDecl);
+    st_insert("input", 0, 0, inputDecl);
+    st_insert("output", 0, 0, outputDecl);
 
 	return;
 }

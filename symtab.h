@@ -59,7 +59,7 @@ void sc_pop();
  * first time, otherwise ignored
  * In C--, pointer to Node AST added
  */
-void st_insert(string id, int lineno, int loc, Node *node);
+void st_insert(string id, int lineno, int size, Node *node);
 void st_insert_nearest(string id, int lineno, int loc, Node *node);
 
 /* Function st_lookup returns the memory
