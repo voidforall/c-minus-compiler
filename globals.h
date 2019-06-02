@@ -18,6 +18,8 @@ const bool TraceAnalyze = true; // trace the symbol table
 #include <fstream>
 #include "symtab.h"
 #include "parser.h"
+#include "code.h"
+#include "gentiny.h"
 
 #define ENDFILE 0
 // #include "parser.tab.h"
