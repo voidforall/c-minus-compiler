@@ -6,23 +6,26 @@
 #include "analyze.h"
 #include "util.h"
 #include "gencode.h"
+#include "code.h"
 
 using namespace std;
 
 FILE *listing = stdout;
+FILE *code = stdout;
 
 int main(void)
 {
     // fopen_s(&yyin, "../test.c", "r+");
-    Node * tree = parse();
+//    Node * tree = parse();
 
 //    print_tree(tree);
 //    cgen(tree);
-    buildTable(tree);
-    typeCheck(tree);
+//    buildTable(tree);
+//    typeCheck(tree);
 //    int token = -1;
 //    while (token != ENDFILE) {
 //        token = get_token();
 //    }
+    emitRO("ADD", 0, 1, 2, "comment");
     return 0;
 }
