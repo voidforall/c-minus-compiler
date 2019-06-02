@@ -53,15 +53,15 @@ void gen_code(Node * node, pack & param) {
     NodeType type = node->nodetype;
     switch(type) {
         case Stmt:
-            cout << "StmtNode" << endl;
+//            cout << "StmtNode" << endl;
             gen_stmt((StmtNode*)node, param);
             break;
         case Decl:
-            cout << "DeclNode" << endl;
+//            cout << "DeclNode" << endl;
             gen_decl((DeclNode*)node, param);
             break;
         case Expr:
-            cout << "ExprNode" << endl;
+//            cout << "ExprNode" << endl;
             gen_expr((ExprNode*)node, param);
             break;
     }
@@ -71,11 +71,11 @@ void gen_decl(DeclNode * node, pack & param) {
     DeclType type = node->subtype.decl;
     switch(type) {
         case Var:
-            cout << "VarDeclNode" << endl;
+//            cout << "VarDeclNode" << endl;
             gen_decl_var((VarDeclNode*)node, param);
             break;
         case Fun:
-            cout << "FunDeclNode" << endl;
+//            cout << "FunDeclNode" << endl;
             gen_decl_fun((FunDeclNode*)node, param);
             break;
     }
@@ -92,7 +92,9 @@ void gen_decl_fun(FunDeclNode * node, pack & param) {
     param.f << "\t" << "BeginFunc;\n";
 
     for(auto x : node->children) {
-        gen_code(x, param);
+        if(x != nullptr) {
+            gen_code(x, param);
+        }
     }
 
     param.f << "\t" << "EndFunc;\n";
@@ -104,23 +106,23 @@ void gen_expr(ExprNode * node, pack & param) {
     ExprType type = node->subtype.expr;
     switch(type) {
         case Assign:
-            cout << "AssignExprNode" << endl;
+//            cout << "AssignExprNode" << endl;
             gen_expr_assign((AssignExprNode*)node, param);
             break;
         case Call:
-            cout << "CallExprNode" << endl;
+//            cout << "CallExprNode" << endl;
             gen_expr_call((CallExprNode*)node, param);
             break;
         case Op:
-            cout << "OpExprNode" << endl;
+//            cout << "OpExprNode" << endl;
             gen_expr_op((OpExprNode*)node, param);
             break;
         case Const:
-            cout << "ConstExprNode" << endl;
+//            cout << "ConstExprNode" << endl;
             gen_expr_const((ConstExprNode*)node, param);
             break;
         case Id:
-            cout << "IdExprNode" << endl;
+//            cout << "IdExprNode" << endl;
             gen_expr_id((IdExprNode*)node, param);
             break;
     }
@@ -283,23 +285,23 @@ void gen_stmt(StmtNode * node, pack & param) {
     StmtType type = node->subtype.stmt;
     switch(type) {
         case ExprStmt:
-            cout << "ExprStmtNode" << endl;
+//            cout << "ExprStmtNode" << endl;
             gen_stmt_expr((ExprStmtNode*)node, param);
             break;
         case If:
-            cout << "IfStmtNode" << endl;
+//            cout << "IfStmtNode" << endl;
             gen_stmt_if((IfStmtNode*)node, param);
             break;
         case Iter:
-            cout << "IterStmtNode" << endl;
+//            cout << "IterStmtNode" << endl;
             gen_stmt_iter((IterStmtNode*)node, param);
             break;
         case Return:
-            cout << "ReturnStmtNode" << endl;
+//            cout << "ReturnStmtNode" << endl;
             gen_stmt_return((ReturnStmtNode*)node, param);
             break;
         case Compound:
-            cout << "CompoundStmtNode" << endl;
+//            cout << "CompoundStmtNode" << endl;
             gen_stmt_compound((CompoundStmtNode*)node, param);
             break;
         default:

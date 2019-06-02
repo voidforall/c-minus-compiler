@@ -47,7 +47,6 @@ public:
 };
 typedef ScopeRec* Scope;
 
-
 Scope sc_create(string scopeName);
 // basic operations on scope stack
 Scope sc_top();

@@ -33,12 +33,12 @@ void gentiny_decl_var(VarDeclNode * node, track & track);
 void gentiny_decl_fun(FunDeclNode * node, track & track);
 
 // ExprType : Assign, Call, Op, Const, Id
-void gentiny_expr(ExprNode * tree, track & track);
+void gentiny_expr(ExprNode * tree, track & track, bool isAddress=false);
 void gentiny_expr_assign(AssignExprNode * node, track & track);
 void gentiny_expr_call(CallExprNode * node, track & track);
 void gentiny_expr_op(OpExprNode * node, track & track);
 void gentiny_expr_const(ConstExprNode * node, track & track);
-void gentiny_expr_id(IdExprNode * node, track & track);
+void gentiny_expr_id(IdExprNode * node, track & track, bool isAddress);
 
 // StmtType : ExprStmt, If, Iter, Return, Compound
 void gentiny_stmt(StmtNode * tree, track & track);
