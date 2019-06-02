@@ -1,4 +1,4 @@
-parser: lex.yy.c parser.tab.c parser.tab.h util.cpp main.cpp lexer.h util.h globals.cpp gencode.cpp analyze.h symtab.h gencode.h code.cpp code.h
+parser: lex.yy.c parser.tab.c parser.tab.h util.cpp main.cpp lexer.h util.h globals.cpp gencode.cpp analyze.h symtab.h gencode.h code.cpp code.h analyze.cpp
 	g++ -o parser main.cpp util.cpp lex.yy.c parser.tab.c globals.cpp analyze.cpp gencode.cpp symtab.cpp code.cpp -std=c++11  -w
 
 lex.yy.c: lexer.l parser.tab.h globals.h symtab.h
