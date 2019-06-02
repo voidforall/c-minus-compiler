@@ -23,6 +23,8 @@ static int nScope = 0;
 static Scope scopeStack[MAX_SCOPE_NUM];
 static int nScopeStack = 0;
 
+static int locAlloc[MAX_SCOPE_NUM];
+
 /* the hash function:
 * h = (a^(n-1)c1 + ... + cn) mod size
 */
@@ -56,6 +58,11 @@ Scope sc_top()
 void sc_push(Scope scope)
 {
 	scopeStack[nScopeStack++] = scope;
+	/* fix: mem allocation considering codegen */
+	if(scope->parentScope == NULL || scope->parentScope->scopeName == "global")
+	    locAlloc[nScopeStack-1] = 0;
+	else
+	    locAlloc[nScopeStack - 1] = locAlloc[nScopeStack - 2];
 }
 
 void sc_pop()
@@ -77,7 +84,7 @@ void st_insert(string id, int lineno, int loc, Node *node) {
 	}
 
 	if (idx == -1) { /* variable not yet in table */
-		BucketListRec r = BucketListRec(id, node, loc);
+		BucketListRec r = BucketListRec(id, node, locAlloc[nScopeStack-1]++);
 		r.lines.push_back(lineno);
 		listPointer->push_back(r);
 	}
@@ -156,9 +163,9 @@ BucketList st_lookup_list(Scope s, string id)
 }
 
 /* invoked in printSymTab, presenting the information of one identifier */
-// format: [identifier]  [DeclType]  [TypeKind]  [Lineno(s)]
-// e.g.		   main		  Function	   void	         8
-//              a           Var        Int        7, 11, 20
+// format: [identifier]  [DeclType]  [TypeKind] [memloc] [Lineno(s)]
+// e.g.		   main		  Function	   void	        0         8
+//              a           Var        Int          1      7, 11, 20
 void printIdentifier(FILE * listing, BucketList *hTable)
 {
 	VarDeclNode *varNode;
@@ -202,6 +209,8 @@ void printIdentifier(FILE * listing, BucketList *hTable)
 				break;
 			}
 
+			fprintf(listing, "%4d      ", l[i].memloc);
+
 			for (auto no : l[i].lines) {
 				fprintf(listing, "%4d ", no);
 			}
@@ -227,8 +236,8 @@ void printSymTab(FILE * listing) {
 		// print nested level(global:0, main:1)
 		fprintf(listing, "<nested depth: %d>\n", scope->nestedLevel);
 		
-		fprintf(listing, "Name       | Type   | dataType  | LineNOs \n");
-		fprintf(listing, "=======================================\n");
+		fprintf(listing, "Name       | Type   | dataType  |  memloc  | LineNOs \n");
+		fprintf(listing, "=====================================================\n");
 		
 		printIdentifier(listing, hashTable);
 		fprintf(listing, "\n");
