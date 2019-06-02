@@ -26,7 +26,6 @@ int track::find_func(string id) {
 }
 
 void gentiny(Node * tree) {
-    string path = "/Users/apple/Desktop/ZBoom/zjj/2018-2019-2nd semester/Compiler Principle/Codes/Compiler/C-minus-compiler/result.tiny";
     track t;
 
     for (Node * node = tree; node != nullptr; node = node->next) {
