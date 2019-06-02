@@ -107,7 +107,7 @@ param_list:
 
 param:
 	type_specifier ID { $$ = new VarDeclNode($1, $2); }
-	| type_specifier ID '[' ']' { $$ = new VarDeclNode($1, $2, true); }
+	| type_specifier ID '[' ']' { $$ = new VarDeclNode($1, $2, true, 0, true); }
 	;
 
 compound_stmt:
