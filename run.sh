@@ -1,2 +1,2 @@
-./parser < test3.c
+./parser < test4.c
 ./tm test.tm

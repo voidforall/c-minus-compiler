@@ -308,8 +308,9 @@ void gentiny_expr_call(CallExprNode * node, track & track) {
         // param is a exp node
         gentiny_code(param, track);
         // after this, result will be stored in ac. Store this
-        sprintf(buffer, "store parameter %s", param_offset);
-        emitRM("ST", ac, frame_offset + initFO + param_offset, fp, buffer);
+        sprintf(buffer, "store parameter %d", param_offset);
+        emitRM("ST", ac, frame_offset + initFO - param_offset, fp, buffer);
+        param_offset += 1;
     }
 
     // store old frame pointer

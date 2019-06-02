@@ -123,7 +123,7 @@ static void insertNode(Node * t) {
 			}
 			if (st_lookup_nonest(sc_top(), varNode->id) < 0) {
 			    int size = 0;
-				if (varNode->is_array) {
+				if (varNode->is_array and not varNode->is_param) {
 					size = varNode->num;
 				} else {
 					size = 1;
