@@ -47,8 +47,6 @@ public:
 };
 typedef ScopeRec* Scope;
 
-static Scope global; // global scope: derive out other scopes
-
 Scope sc_create(string scopeName);
 // basic operations on scope stack
 Scope sc_top();

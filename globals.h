@@ -6,7 +6,7 @@
 const bool TraceScan = true;
 const bool TraceParse = true;
 const bool TraceAnalyze = true; // trace the symbol table
-
+const bool TraceCode = true; // trace the tiny codegen
 
 #include <cstdio>
 #include <cstdlib>
@@ -19,7 +19,6 @@ const bool TraceAnalyze = true; // trace the symbol table
 #include "symtab.h"
 #include "parser.h"
 #include "code.h"
-#include "gentiny.h"
 
 #define ENDFILE 0
 // #include "parser.tab.h"

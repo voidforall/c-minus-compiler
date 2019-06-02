@@ -6,7 +6,8 @@
 
 using namespace std;
 
-extern FILE *listing; 
+extern FILE *listing;
+extern Scope global;
 static bool Error = false;
 static int location = 0; // allocation of memory location
 
@@ -169,10 +170,15 @@ static void initSymTab() {
 	sc_push(global);
 
 
-	// input & output 
-	FunDeclNode *inputDecl, *outputDecl;
-	// TODO: input/output not done in parser
+	// input & output
+	FunDeclNode *inputDecl = new FunDeclNode(Int, "input", NULL, NULL);
+    VarDeclNode *param = new VarDeclNode(Int, "x");
 
+	FunDeclNode *outputDecl = new FunDeclNode(Void, "output", param , NULL);
+
+	/* insert the input/output as system call into global, lineno 0*/
+    st_insert("input", 0, location++, inputDecl);
+    st_insert("output", 0,location++, outputDecl);
 
 	return;
 }
