@@ -95,9 +95,10 @@ public:
 	TypeKind kind;
 	string id;
 	bool is_array = false;
+	bool is_param = false;
 	int num = 0;
-	VarDeclNode(TypeKind kind, const string & id, bool is_array = false, int num = 0)
-		: DeclNode(Var), kind(kind), id(id), is_array(is_array), num(num) {}
+	VarDeclNode(TypeKind kind, const string & id, bool is_array = false, int num = 0, bool is_param=false)
+		: DeclNode(Var), kind(kind), id(id), is_array(is_array), num(num), is_param(is_param) {}
 	virtual string str();
 };
 

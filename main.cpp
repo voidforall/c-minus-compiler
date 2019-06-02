@@ -19,10 +19,10 @@ extern FILE * yyin;
 
 int main(void)
 {
-    yyin = fopen("test3.c", "r+");
-    if (yyin == NULL) {
-        cout << "no" << endl;
-    }
+//    yyin = fopen("test4.c", "r+");
+//    if (yyin == NULL) {
+//        cout << "no" << endl;
+//    }
     Node * tree = parse();
 
 //    print_tree(tree);

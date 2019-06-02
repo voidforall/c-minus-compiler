@@ -221,8 +221,12 @@ void gentiny_stmt_iter(IterStmtNode * node, track & track) {
 }
 
 void gentiny_stmt_return(ReturnStmtNode * node, track & track) {
+    if(TraceCode)
+        emitComment("--> Return");
     Node * expr = node->children[0];
     gentiny_expr((ExprNode*)expr, track);
+    if(TraceCode)
+        emitComment("<-- Return");
 }
 
 void gentiny_stmt_compound(CompoundStmtNode * node, track & track) {
@@ -290,7 +294,7 @@ void gentiny_expr_assign(AssignExprNode * node, track & track) {
 
 void gentiny_expr_call(CallExprNode * node, track & track) {
     if (TraceCode) {
-        sprintf(buffer, "-> Calling (%s)", node->id.c_str());
+        sprintf(buffer, "--> Calling (%s)", node->id.c_str());
         emitComment(buffer);
     }
 
@@ -304,8 +308,9 @@ void gentiny_expr_call(CallExprNode * node, track & track) {
         // param is a exp node
         gentiny_code(param, track);
         // after this, result will be stored in ac. Store this
-        sprintf(buffer, "store parameter %s", param_offset);
-        emitRM("ST", ac, frame_offset + initFO + param_offset, fp, buffer);
+        sprintf(buffer, "store parameter %d", param_offset);
+        emitRM("ST", ac, frame_offset + initFO - param_offset, fp, buffer);
+        param_offset += 1;
     }
 
     // store old frame pointer
@@ -322,6 +327,10 @@ void gentiny_expr_call(CallExprNode * node, track & track) {
 
     // because no real space is used, we change this back
     frame_offset++;
+    if (TraceCode) {
+        sprintf(buffer, "<-- Calling (%s)", node->id.c_str());
+        emitComment(buffer);
+    }
 }
 
 void gentiny_expr_op(OpExprNode * node, track & track) {
@@ -438,9 +447,22 @@ void gentiny_expr_id(IdExprNode * node, track & track, bool isAddress) {
     emitRM("LDC", ac, idOffset, 0, "ExprId: load id offset to ac");
     emitRO("ADD", ac, fp, ac, "ExprId: fp + offset = base address");
 
+
+    BucketList list = st_lookup_list(s, node->id);
+    VarDeclNode * var_node = nullptr;
+    for (const auto & rec : list) {
+        if (rec.id == node->id) {
+            var_node = dynamic_cast<VarDeclNode *>(rec.node);
+        }
+    }
+    // this is for the case in which x is a array parameter
+    if (var_node->is_param) {
+        // load absolute address
+        emitRM("LD", ac, 0, ac, "load absolute address");
+    }
     // may need to execute the indexExpr if it's an array
     if(node->has_index){
-        // if(mem_loc >= 0 && mem_loc < paramNums) 数组名参数-绝对地址
+//         if(mem_loc >= 0 && mem_loc < param_offset())
 
         // a local array variable: ac-base address
         Node *index = node->children[0];
@@ -452,7 +474,8 @@ void gentiny_expr_id(IdExprNode * node, track & track, bool isAddress) {
     }
 
     // isAddress - lhs like a[11], need the address of a[11]
-    if(isAddress){
+    // the weird case is for cases like x[10], output(x)
+    if(isAddress or (var_node->is_array and not node->has_index)){
         emitRM("LDA", ac, 0, ac, "ExprId: load id address");
     }else{
         emitRM("LD", ac, 0, ac, "ExprId: load id value");
@@ -504,7 +527,7 @@ void gentiny_decl_fun(FunDeclNode * node, track & track) {
      */
 
     if (TraceCode) {
-        sprintf(buffer, "-> Function (%s)", node->id.c_str());
+        sprintf(buffer, "--> Function (%s)", node->id.c_str());
         emitComment(buffer);
     }
 
@@ -531,7 +554,7 @@ void gentiny_decl_fun(FunDeclNode * node, track & track) {
     emitRM("LD", pc, retFO, fp, "return to caller");
 
     if (TraceCode) {
-        sprintf(buffer, "<- Function (%s)", node->id.c_str());
+        sprintf(buffer, "<-- Function (%s)", node->id.c_str());
         emitComment(buffer);
     }
 }
