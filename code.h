@@ -23,6 +23,11 @@
  */
 #define gp 5
 
+/*
+ * frame pointer
+ */
+# define fp 4
+
 /* accumulator */
 #define  ac 0
 

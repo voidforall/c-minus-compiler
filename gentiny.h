@@ -18,7 +18,7 @@ public:
 
 class track {
 public:
-    scope * current_scope;
+    Scope current_scope;
     vector<fun> funs;
     void add_func(string id, int index);
     int find_func(string id);

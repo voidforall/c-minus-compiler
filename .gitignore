@@ -7,5 +7,8 @@ lex.yy.cpp
 parser.tab.cpp
 parser.tab.c
 parser.tab.h
+parser.tab.hpp
 parser
 result.tac
+test.tm
+tm
