@@ -178,12 +178,13 @@ void gentiny_stmt_if(IfStmtNode * node, track & track) {
 
     if(node->children.size() == 3) {
         int loc2 = emitSkip(1);
+        int loc3 = emitSkip(0);
         stmt = node->children[2];
         gentiny_stmt((StmtNode*)stmt, track);
 
         int current_loc = emitSkip(0);
         emitBackup(loc1);
-        emitRM_Abs("JEQ", ac, loc2, "If false, jump to else part");
+        emitRM_Abs("JEQ", ac, loc3, "If false, jump to else part");
         emitRestore();
 
         emitBackup(loc2);
