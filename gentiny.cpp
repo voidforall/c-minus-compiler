@@ -4,6 +4,7 @@
 
 #include "gentiny.h"
 #include "code.h"
+#include "globals.h"
 #include <cstdlib>
 
 char buffer[1024];
@@ -336,82 +337,122 @@ void gentiny_expr_call(CallExprNode * node, track & track) {
 
 void gentiny_expr_op(OpExprNode * node, track & track) {
     ExprNode *op1, *op2;
+    ConstExprNode *op1_c, *op2_c;
+    bool const_folding = false; // code opt
     op1 = dynamic_cast<ExprNode*>(node->children[0]);
     op2 = dynamic_cast<ExprNode*>(node->children[1]);
     if(TraceCode)
         emitComment("--> Op");
+    if(op1->subtype.expr == Const && op2->subtype.expr == Const){
+        const_folding = true;
+        op1_c = dynamic_cast<ConstExprNode*>(op1);
+        op2_c = dynamic_cast<ConstExprNode*>(op2);
+    }
+    if(!const_folding){
+        // push result value op1 to mp stack: ac->temp[mp--]
+        gentiny_expr(op1, track, false);
+        emitRM("ST", ac, --frame_offset, fp, "op: push operand1 to mp");
 
-    // push result value op1 to mp stack: ac->temp[mp--]
-    gentiny_expr(op1, track, false);
-    emitRM("ST", ac, --frame_offset, fp, "op: push operand1 to mp");
-
-    gentiny_expr(op2, track, false);
-    emitRM("LD", ac1, frame_offset++, fp, "op: load operand1 from mp");
+        gentiny_expr(op2, track, false);
+        emitRM("LD", ac1, frame_offset++, fp, "op: load operand1 from mp");
+    }
 
     // ac: op2 ac1: op1 -> save in ac
     switch(node->op){
         case Plus:{
-            emitRO("ADD", ac, ac1, ac, "op: Plus");
+            if(const_folding)
+                emitRM("LDC", ac, op1_c->value + op2_c->value, 0, "op: op1 + op2");
+            else emitRO("ADD", ac, ac1, ac, "op: Plus");
             break;
         }
         case Minus:{
-            emitRO("SUB", ac, ac1, ac, "op: Minus");
+            if(const_folding)
+                emitRM("LDC", ac, op1_c->value - op2_c->value, 0, "op: op1 - op2");
+            else emitRO("SUB", ac, ac1, ac, "op: Minus");
             break;
         }
         case Times:{
-            emitRO("MUL", ac, ac1, ac, "op: Times");
+            if(const_folding)
+                emitRM("LDC", ac, op1_c->value * op2_c->value, 0, "op: op1 * op2");
+            else emitRO("MUL", ac, ac1, ac, "op: Times");
             break;
         }
         case Divide:{
-            emitRO("DIV", ac, ac1, ac, "op: Divide");
+            if(const_folding)
+                emitRM("LDC", ac, op1_c->value / op2_c->value, 0, "op: op1 / op2");
+            else emitRO("DIV", ac, ac1, ac, "op: Divide");
             break;
         }
         case Ge:{
-            emitRO("SUB", ac, ac1, ac, "op: >=");
-            emitRM("JGE", ac, 2, pc, "if >=, pc = pc + 2");
-            emitRM("LDC", ac, 0, ac, "if false, ac = 0");
-            emitRM("LDA", pc, 1, pc, "if false, skip next");
-            emitRM("LDC", ac, 1, ac, "if true, ac = 1");
+            if(const_folding)
+                emitRM("LDC", ac, op1_c->value >= op2_c->value ? 1 : 0, 0, "op: op1 >= op2");
+            else {
+                emitRO("SUB", ac, ac1, ac, "op: >=");
+                emitRM("JGE", ac, 2, pc, "if >=, pc = pc + 2");
+                emitRM("LDC", ac, 0, ac, "if false, ac = 0");
+                emitRM("LDA", pc, 1, pc, "if false, skip next");
+                emitRM("LDC", ac, 1, ac, "if true, ac = 1");
+            }
             break;
         }
         case Le:{
-            emitRO("SUB", ac, ac1, ac, "op: <=");
-            emitRM("JLE", ac, 2, pc, "if <=, pc = pc + 2");
-            emitRM("LDC", ac, 0, ac, "if false, ac = 0");
-            emitRM("LDA", pc, 1, pc, "if false, skip next");
-            emitRM("LDC", ac, 1, ac, "if true, ac = 1");
+            if(const_folding)
+                emitRM("LDC", ac, op1_c->value <= op2_c->value ? 1 : 0, 0, "op: op1 <= op2");
+            else {
+                emitRO("SUB", ac, ac1, ac, "op: <=");
+                emitRM("JLE", ac, 2, pc, "if <=, pc = pc + 2");
+                emitRM("LDC", ac, 0, ac, "if false, ac = 0");
+                emitRM("LDA", pc, 1, pc, "if false, skip next");
+                emitRM("LDC", ac, 1, ac, "if true, ac = 1");
+            }
             break;
         }
         case Gt:{
-            emitRO("SUB", ac, ac1, ac, "op: >");
-            emitRM("JGT", ac, 2, pc, "if >, pc = pc + 2");
-            emitRM("LDC", ac, 0, ac, "if false, ac = 0");
-            emitRM("LDA", pc, 1, pc, "if false, skip next");
-            emitRM("LDC", ac, 1, ac, "if true, ac = 1");
+            if(const_folding)
+                emitRM("LDC", ac, op1_c->value > op2_c->value ? 1 : 0, 0, "op: op1 > op2");
+            else {
+                emitRO("SUB", ac, ac1, ac, "op: >");
+                emitRM("JGT", ac, 2, pc, "if >, pc = pc + 2");
+                emitRM("LDC", ac, 0, ac, "if false, ac = 0");
+                emitRM("LDA", pc, 1, pc, "if false, skip next");
+                emitRM("LDC", ac, 1, ac, "if true, ac = 1");
+            }
             break;
         }
         case Lt:{
-            emitRO("SUB", ac, ac1, ac, "op: <");
-            emitRM("JLT", ac, 2, pc, "if <, pc = pc + 2");
-            emitRM("LDC", ac, 0, ac, "if false, ac = 0");
-            emitRM("LDA", pc, 1, pc, "if false, skip next");
-            emitRM("LDC", ac, 1, ac, "if true, ac = 1");
+            if(const_folding)
+                emitRM("LDC", ac, op1_c->value < op2_c->value ? 1 : 0, 0, "op: op1 < op2");
+            else {
+                emitRO("SUB", ac, ac1, ac, "op: <");
+                emitRM("JLT", ac, 2, pc, "if <, pc = pc + 2");
+                emitRM("LDC", ac, 0, ac, "if false, ac = 0");
+                emitRM("LDA", pc, 1, pc, "if false, skip next");
+                emitRM("LDC", ac, 1, ac, "if true, ac = 1");
+            }
             break;
         }
         case Eq:{
-            emitRO("SUB", ac, ac1, ac, "op: ==");
-            emitRM("JEQ", ac, 2, pc, "if ==, pc = pc + 2");
-            emitRM("LDC", ac, 0, ac, "if false, ac = 0");
-            emitRM("LDA", pc, 1, pc, "if false, skip next");
-            emitRM("LDC", ac, 1, ac, "if true, ac = 1");
+            if(const_folding)
+                emitRM("LDC", ac, op1_c->value == op2_c->value ? 1 : 0, 0, "op: op1 == op2");
+            else {
+                emitRO("SUB", ac, ac1, ac, "op: ==");
+                emitRM("JEQ", ac, 2, pc, "if ==, pc = pc + 2");
+                emitRM("LDC", ac, 0, ac, "if false, ac = 0");
+                emitRM("LDA", pc, 1, pc, "if false, skip next");
+                emitRM("LDC", ac, 1, ac, "if true, ac = 1");
+            }
             break;
         }
         case Ne:{
-            emitRO("SUB", ac, ac1, ac, "op: !=");
-            emitRM("JNE", ac, 2, pc, "if !=, pc = pc + 2");
-            emitRM("LDC", ac, 0, ac, "if false, ac = 0");
-            emitRM("LDA", pc, 1, pc, "if false, skip next");
-            emitRM("LDC", ac, 1, ac, "if true, ac = 1");
+            if(const_folding)
+                emitRM("LDC", ac, op1_c->value != op2_c->value ? 1 : 0, 0, "op: op1 != op2");
+            else {
+                emitRO("SUB", ac, ac1, ac, "op: !=");
+                emitRM("JNE", ac, 2, pc, "if !=, pc = pc + 2");
+                emitRM("LDC", ac, 0, ac, "if false, ac = 0");
+                emitRM("LDA", pc, 1, pc, "if false, skip next");
+                emitRM("LDC", ac, 1, ac, "if true, ac = 1");
+            }
             break;
         }
         default:
