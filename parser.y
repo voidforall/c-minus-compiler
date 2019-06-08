@@ -100,7 +100,7 @@ param_list:
 	param_list ',' param {
 		Node * node = find_tail($1);
 		node->next = $3;
-		$$ = node;
+		$$ = $1;
 	}
 	| param { $$ = $1; }
 	;
@@ -233,7 +233,7 @@ arg_list:
 	arg_list ',' expr {
 		Node * node = find_tail($1);
 		node->next = $3;
-		$$ = node;
+		$$ = $1;
 	}
 	| expr { $$ = $1; }
 	;
