@@ -1,4 +1,4 @@
-void fuck(int f){
+void hi(int f){
     int val;
     {
         int x;
@@ -27,11 +27,11 @@ int main ( int y, int yes)  {
     a = 5;
     b[1] = 1;
     add(1);
-    while(fuck(x)){
+    while(hi(x)){
         x = 2 * x;
     }
-    x = a[fuck(1)];
+    x = a[hi(1)];
 
-    x = fuck(1) + 1;
+    x = hi(1) + 1;
     return a[11]  - 6;
 }

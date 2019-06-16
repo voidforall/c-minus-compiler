@@ -3,16 +3,18 @@
 #include "globals.h"
 #include "util.h"
 #include "parser.h"
+#include "lexer.h"
 
 using namespace std;
 static Node * parse_tree;
 extern "C"
 {
         int yyparse(void);
-        int yylex(void);
+//        int yylex(void);
         extern int yylineno;
 }
 void yyerror(char * msg);
+static int yylex(void);
 
 %}
 
@@ -244,6 +246,10 @@ extern FILE * listing;
 
 void yyerror(char * msg) {
 	fprintf(stderr, "line %d: %s\n", yylineno, msg);
+}
+
+static int yylex() {
+	return get_token();
 }
 
 Node * parse() {

@@ -44,7 +44,7 @@ int main(void) {
 	i = 0;
 
 	while(i < x) {
-		a[i] = i;
+		a[i] = input();
 		i = i + 1;
 	}
 

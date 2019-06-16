@@ -1,13 +1,34 @@
-parser: lex.yy.cpp parser.tab.cpp parser.tab.h util.cpp main.cpp lexer.h util.h globals.cpp gencode.cpp analyze.h symtab.h gencode.h code.cpp code.h analyze.cpp gentiny.cpp gentiny.h
-	g++ -o parser main.cpp util.cpp lex.yy.cpp parser.tab.cpp globals.cpp analyze.cpp gencode.cpp symtab.cpp code.cpp gentiny.cpp -std=c++11  -w
+CC = g++
+SRC_DIR = src
+BUILD_DIR = build
+LEX = lex
+YACC = bison
+CFLAGS = -std=c++11 -Wno-deprecated-register -Wno-writable-strings
 
-lex.yy.cpp: lexer.l parser.tab.h globals.h symtab.h
-	lex -o lex.yy.cpp lexer.l 
+# objects
+_OBJS = lex.yy.o parser.tab.o util.o main.o globals.o gencode.o analyze.o code.o gentiny.o symtab.o
+OBJS = $(patsubst %,$(BUILD_DIR)/%,$(_OBJS))
 
-parser.tab.h parser.tab.cpp: parser.y globals.h symtab.h
-	bison -d parser.y -o parser.tab.cpp
+# .h
+_DEPS = parser.tab.h util.h globals.h gencode.h analyze.h code.h gentiny.h symtab.h parser.h lexer.h
+DEPS = $(patsubst %,$(SRC_DIR)/%,$(_DEPS))
 
-clean: 
-	rm -f lex.yy.c y.tab.c y.tab.h parser parser.tab.h parser.tab.c
+
+cminus: $(OBJS)
+	$(CC) -o cminus $(OBJS) $(CFLAGS)
+
+$(OBJS): $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+$(SRC_DIR)/lex.yy.cpp: $(SRC_DIR)/lexer.l $(DEPS)
+	$(LEX) -o $@ $< 
+
+$(SRC_DIR)/parser.tab.h $(SRC_DIR)/parser.tab.cpp: $(SRC_DIR)/parser.y $(DEPS)
+	$(YACC) --defines=$(SRC_DIR)/parser.tab.h $< -o $(SRC_DIR)/parser.tab.cpp
+
+.PHONY: clean
+clean:
+	-rm -f $(OBJS)
+	-rm $(SRC_DIR)/lex.yy.cpp $(SRC_DIR)/parser.tab.h $(SRC_DIR)/parser.tab.cpp
 
 

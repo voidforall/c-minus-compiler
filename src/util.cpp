@@ -47,7 +47,7 @@ void print_tree(Node * tree, int level) {
     for (Node * node = tree; node != nullptr; node = node->next) {
 //        cout << indent << node->str() << endl;
         string line = indent + node->str() + "\n";
-        fprintf(listing, line.c_str());
+        fprintf(listing, "%s", line.c_str());
         for (const auto & x: node->children) {
             print_tree(x, level + 1);
         }
@@ -58,6 +58,7 @@ string print_type(TypeKind type) {
     switch (type) {
         case Int: return "int";
         case Void: return "void";
+        default: return "error";
     }
 }
 string print_op(OpKind op) {
@@ -72,5 +73,6 @@ string print_op(OpKind op) {
         case Minus: return "-";
         case Times: return "*";
         case Divide: return "/";
+        default: return "error";
     }
 }

@@ -38,8 +38,8 @@ pack::pack(int size, const string path, bool vis): f(path, ios::out) {
     this->vis = vis;
 }
 
-void cgen(Node * tree) {
-    string path = "/Users/apple/Desktop/ZBoom/zjj/2018-2019-2nd semester/Compiler Principle/Codes/Compiler/C-minus-compiler/result.tac";
+void cgen(Node * tree, string path) {
+//    string path = "/Users/apple/Desktop/ZBoom/zjj/2018-2019-2nd semester/Compiler Principle/Codes/Compiler/C-minus-compiler/result.tac";
     pack param = pack(16, path, true);
 
     for (Node * node = tree; node != nullptr; node = node->next) {

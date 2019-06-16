@@ -27,7 +27,7 @@ public:
     pack(int size, string path, bool vis);
 };
 
-void cgen(Node * tree);
+void cgen(Node * tree, string path);
 void gen_code(Node * tree, pack & param);
 
 // DeclType : Var, Fun

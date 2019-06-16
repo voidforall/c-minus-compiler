@@ -20,10 +20,11 @@
 // #include "parser.tab.h"
 using namespace std;
 
-const bool TraceScan = true;
-const bool TraceParse = true;
-const bool TraceCode = true;
-const bool TraceAnalyze = true; // trace the symbol table
+const bool TraceScan = false;
+const bool TraceParse = false;
+const bool TraceAnalyze = false; // trace the symbol table
+const bool TraceCode = false;
+
 extern FILE * listing;
 extern FILE * code;
 const int BUFSIZE = 256;

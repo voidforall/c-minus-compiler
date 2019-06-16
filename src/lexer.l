@@ -66,7 +66,7 @@ int yywrap()
 int get_token() {
 	int token = yylex();
 	if (TraceScan)
-		printf("\t%d: %s\n", yylineno, print_token(token, yytext).c_str());
+		printf("%d: %s\n", yylineno, print_token(token, yytext).c_str());
 	return token;
 }
 

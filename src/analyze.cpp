@@ -85,7 +85,7 @@ static void insertNode(Node * t) {
 				/* NULL in loc field means add in lineno field */
 				if(st_lookup_nonest(sc_top(), idNode->id) < 0){
 					// not in current scope, invoke st_insert_nearest
-					st_insert_nearest(idNode->id, idNode->lineno, NULL, t);
+					st_insert_nearest(idNode->id, idNode->lineno, 0, t);
 				}
 				else {
 					st_insert(idNode->id, idNode->lineno, 0, t);
@@ -100,7 +100,7 @@ static void insertNode(Node * t) {
 				typeError(t, "undeclared function");
 			}
 			else {
-				st_insert_nearest(callNode->id, callNode->lineno, NULL, t);
+				st_insert_nearest(callNode->id, callNode->lineno, 0, t);
 			}
 			break;
 		}
