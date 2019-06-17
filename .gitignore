@@ -12,3 +12,6 @@ parser
 result.tac
 test.tm
 tm
+build
+*.o
+cminus

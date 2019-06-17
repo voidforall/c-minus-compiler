@@ -13,6 +13,7 @@ void yyerror(char * msg);
 %}
 
 %option yylineno
+%x C_COMMENT
 
 digit [0-9]
 letter [a-zA-Z]
@@ -55,6 +56,10 @@ whitespace [ \t\n]+
 }
 {num}   { yylval.intval = atoi(yytext); return NUM; }
 {whitespace}    ;
+"/*"            { BEGIN(C_COMMENT); }
+<C_COMMENT>"*/" { BEGIN(INITIAL); }
+<C_COMMENT>.    { }
+<C_COMMENT>\n   { }
 . yyerror("invalid character\n");
 
 %%

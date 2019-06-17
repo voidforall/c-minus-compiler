@@ -12,6 +12,7 @@
 
 using namespace std;
 
+extern bool Error;
 const bool GEN_INTERMEDIATE = true;
 
 FILE *listing = stdout;
@@ -34,6 +35,10 @@ int main(int argc, char * argv[])
 
     buildTable(tree);
     typeCheck(tree);
+
+    if (Error) {
+        exit(0);
+    }
 
     code = fopen(argv[2], "w");
     if (code == NULL) {

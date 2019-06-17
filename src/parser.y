@@ -246,6 +246,7 @@ extern FILE * listing;
 
 void yyerror(char * msg) {
 	fprintf(stderr, "line %d: %s\n", yylineno, msg);
+	exit(0);
 }
 
 static int yylex() {

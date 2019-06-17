@@ -8,7 +8,7 @@ using namespace std;
 
 extern FILE *listing;
 extern Scope global;
-static bool Error = false;
+bool Error = false;
 static int location = 0; // allocation of memory location
 
 // declFunc -> true; makes the first compoundStmt in a function not nested

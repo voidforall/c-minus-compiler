@@ -1,7 +1,7 @@
 CC = g++
 SRC_DIR = src
 BUILD_DIR = build
-LEX = lex
+LEX = flex
 YACC = bison
 CFLAGS = -std=c++11 -Wno-deprecated-register -Wno-writable-strings
 
