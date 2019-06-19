@@ -1,3 +1,5 @@
+[TOC]
+
 # 词法分析
 
 ## 原理简介
@@ -380,4 +382,247 @@ Func: int main
 ```
 
 
+
+# 中间代码生成
+
+## 原理简介
+
+程序通过遍历语法树，访问各个语句节点，按照一定规则逐个翻译成中间代码。
+
+由前，所有的语句可分为三类，同时每类可以细分为几个小类别：
+
+- Stmt : ExprStmt/IfStmt/IterStmt/ReturnStmt/CompoundStmt
+- Expr : AssignExpr/CallExpr/OpExpr/ConstExpr/IdExpr
+- Decl : VarDecl/FunDecl
+
+接下来，逐个介绍其三地址码转化形式
+
+
+
+## Stmt语句
+
+### ExprStmt
+
+直接转化为Expr，调用Expr的生成函数即可，后面会做详细介绍
+
+
+
+### IfStmt
+
+采用If_false跳转指令，计算跳转条件之后，若为false(即为0)，跳转至else部分或语句结尾，反之则顺序执行，执行完语句块之后跳转至语句结尾。
+
+```
+if(x > 0) {
+    x = x + 1;    
+} else {        
+    x = x - 1;    
+}
+```
+
+```
+    /* calculate jump condition */
+    If_false t0 GOTO L0;
+    /*stmt block 1*/
+    GOTO L1;
+L0:
+    /*stmt block 2*/
+L1:
+```
+
+
+
+### IterStmt
+
+采用If_false跳转指令，计算跳转条件，若为false则跳转至语句尾，反之，顺序执行，执行完语句块中内容后，重新跳转至计算跳转条件的部分。
+
+```
+while(x < 10) {
+    x = x + 1;
+}
+```
+
+```
+L0:
+    /*calculate jump condition*/
+    If_false t0 GOTO L1;
+    /*stmt block*/
+L1:
+```
+
+
+
+### ReturnStmt
+
+加载到寄存器之后直接返回：
+
+```
+retrun x;
+```
+
+```
+t0 = x;
+return t0;
+```
+
+
+
+### CompoundStmt
+
+此为一系列Stmt语句的组合，即{ }中所包括的所有语句，在这里不做处理。
+
+
+
+## Expr语句
+
+### AssignExpr
+
+赋值语句，对元素进行赋值，如下：
+
+```
+int x;
+x = 3;
+```
+
+```
+t0 = 3;
+x = t0;
+```
+
+
+
+### CallExpr
+
+调用函数，先计算出所需要的每一个参数值，并压入，完成之后调用函数，最后弹出所有压入的参数。如下：
+
+```
+int acc(int x) {
+    x = x + 1;
+    return x;
+}
+
+int main(void) {
+    acc(0);
+    return 0;
+}
+```
+
+```
+main :	
+    BeginFunc;	
+    t0 = 0;	
+    PushParam t0;	
+    LCall acc;	
+    PopParams 4;	
+    EndFunc;
+```
+
+
+
+### OpExpr
+
+形如`A = B op C`，计算出B和C的值，然后存储在寄存器中，进行运算，最后赋值给A：
+
+```
+x = 3;
+y = 4;
+x = x + y;
+```
+
+```
+t0 = x;
+t1 = t0;
+t0 = y;
+t2 = t0;
+t0 = t1 + t2;
+x = t0;
+```
+
+
+
+### ConstExpr
+
+在生成时，会将所有常量都存储到寄存器中进行计算：
+
+```
+x = 3;
+```
+
+```
+t0 = 3;
+x = t0;
+```
+
+
+
+### IdExp
+
+在运算时，会将变量的值先存到寄存器中：
+
+```
+x = x + 1;
+```
+
+```
+t0 = x;
+t1 = t0;
+t0 = 1;
+t2 = t0;
+t0 = t1 + t2;
+x = t0;
+
+```
+
+
+
+## Decl语句
+
+### VarDecl
+
+在中间代码生成处，变量定义不做处理。
+
+
+
+### FunDecl
+
+首行为函数名，由BeginFunc作为开头，以EndFunc作为结尾，中间部分和普通语句相同。
+
+```
+int acc(int x) {
+    x = x + 1;
+    return x;
+}
+```
+
+```
+acc :	
+    BeginFunc;	
+    t0 = x;	
+    t1 = t0;
+    t0 = 1;	
+    t2 = t0;	
+    t0 = t1 + t2;	
+    x = t0;	
+    t0 = x;	
+    Return t0;	
+    EndFunc;
+```
+
+
+
+## 数组
+
+访问数组元素变量，找到基地址，算出偏移量，乘以元素大小，相加得到存储地址，之后进行相应的赋值操作：
+
+```
+int a[10];
+a[0] = 1;
+```
+
+```
+t0 = 2;
+t1 = t0 * elem_size(a);
+t2 = &a + t1;
+t0 = 1;
+*t2 = t0;
+```
 
