@@ -13,5 +13,6 @@ result.tac
 test.tm
 tm
 build/*
+!build/dummy.txt
 *.o
 cminus
