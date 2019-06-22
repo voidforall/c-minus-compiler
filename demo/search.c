@@ -40,7 +40,7 @@ int main(void) {
 	int x;
 	int y;
 
-	x = input();
+    x = 10;
 	i = 0;
 
 	while(i < x) {

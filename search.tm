@@ -405,175 +405,171 @@
 230:    LDA  0,0(0) 	ExprId: load id address
 * <-- ExprId
 231:     ST  0,-1007(4) 	assign: push id(addr) to fp
-* --> Calling (input)
-232:     ST  4,-1008(4) 	store old frame pointer
-233:    LDA  4,-1008(4) 	push new frame
-234:    LDA  0,1(7) 	save return address in ac
-235:    LDA  7,-231(7) 	jump to the function
-236:     LD  4,0(4) 	restore frame pointer
-* <-- Calling (input)
-237:     LD  1,-1007(4) 	assign: load id(addr) to ac1
-238:     ST  0,0(1) 	assign: assign expr(ac)->id(ac1)
+* --> Const
+232:    LDC  0,10(0) 	Const: load val to ac
+* <-- Const
+233:     LD  1,-1007(4) 	assign: load id(addr) to ac1
+234:     ST  0,0(1) 	assign: assign expr(ac)->id(ac1)
 * <-- Assign
 * --> Assign
 * --> ExprId
-239:    LDC  0,-1002(0) 	ExprId: load id offset to ac
-240:    ADD  0,4,0 	ExprId: fp + offset = base address
-241:    LDA  0,0(0) 	ExprId: load id address
+235:    LDC  0,-1002(0) 	ExprId: load id offset to ac
+236:    ADD  0,4,0 	ExprId: fp + offset = base address
+237:    LDA  0,0(0) 	ExprId: load id address
 * <-- ExprId
-242:     ST  0,-1007(4) 	assign: push id(addr) to fp
+238:     ST  0,-1007(4) 	assign: push id(addr) to fp
 * --> Const
-243:    LDC  0,0(0) 	Const: load val to ac
+239:    LDC  0,0(0) 	Const: load val to ac
 * <-- Const
-244:     LD  1,-1007(4) 	assign: load id(addr) to ac1
-245:     ST  0,0(1) 	assign: assign expr(ac)->id(ac1)
+240:     LD  1,-1007(4) 	assign: load id(addr) to ac1
+241:     ST  0,0(1) 	assign: assign expr(ac)->id(ac1)
 * <-- Assign
 * --> While
 * --> Op
 * --> ExprId
-246:    LDC  0,-1002(0) 	ExprId: load id offset to ac
+242:    LDC  0,-1002(0) 	ExprId: load id offset to ac
+243:    ADD  0,4,0 	ExprId: fp + offset = base address
+244:     LD  0,0(0) 	ExprId: load id value
+* <-- ExprId
+245:     ST  0,-1007(4) 	op: push operand1 to mp
+* --> ExprId
+246:    LDC  0,-1004(0) 	ExprId: load id offset to ac
 247:    ADD  0,4,0 	ExprId: fp + offset = base address
 248:     LD  0,0(0) 	ExprId: load id value
 * <-- ExprId
-249:     ST  0,-1007(4) 	op: push operand1 to mp
-* --> ExprId
-250:    LDC  0,-1004(0) 	ExprId: load id offset to ac
-251:    ADD  0,4,0 	ExprId: fp + offset = base address
-252:     LD  0,0(0) 	ExprId: load id value
-* <-- ExprId
-253:     LD  1,-1007(4) 	op: load operand1 from mp
-254:    SUB  0,1,0 	op: <
-255:    JLT  0,2(7) 	if <, pc = pc + 2
-256:    LDC  0,0(0) 	if false, ac = 0
-257:    LDA  7,1(7) 	if false, skip next
-258:    LDC  0,1(0) 	if true, ac = 1
+249:     LD  1,-1007(4) 	op: load operand1 from mp
+250:    SUB  0,1,0 	op: <
+251:    JLT  0,2(7) 	if <, pc = pc + 2
+252:    LDC  0,0(0) 	if false, ac = 0
+253:    LDA  7,1(7) 	if false, skip next
+254:    LDC  0,1(0) 	if true, ac = 1
 * <-- Op
 * --> Assign
 * --> ExprId
-260:    LDC  0,-2(0) 	ExprId: load id offset to ac
-261:    ADD  0,4,0 	ExprId: fp + offset = base address
-262:     ST  0,-1007(4) 	ExprId: push base address to mp
+256:    LDC  0,-2(0) 	ExprId: load id offset to ac
+257:    ADD  0,4,0 	ExprId: fp + offset = base address
+258:     ST  0,-1007(4) 	ExprId: push base address to mp
 * --> ExprId
-263:    LDC  0,-1002(0) 	ExprId: load id offset to ac
-264:    ADD  0,4,0 	ExprId: fp + offset = base address
-265:     LD  0,0(0) 	ExprId: load id value
+259:    LDC  0,-1002(0) 	ExprId: load id offset to ac
+260:    ADD  0,4,0 	ExprId: fp + offset = base address
+261:     LD  0,0(0) 	ExprId: load id value
 * <-- ExprId
-266:     LD  1,-1007(4) 	ExprId: load base address to ac1
-267:    SUB  0,1,0 	ExprId: base address - index = index address
-268:    LDA  0,0(0) 	ExprId: load id address
+262:     LD  1,-1007(4) 	ExprId: load base address to ac1
+263:    SUB  0,1,0 	ExprId: base address - index = index address
+264:    LDA  0,0(0) 	ExprId: load id address
 * <-- ExprId
-269:     ST  0,-1007(4) 	assign: push id(addr) to fp
+265:     ST  0,-1007(4) 	assign: push id(addr) to fp
 * --> Calling (input)
-270:     ST  4,-1008(4) 	store old frame pointer
-271:    LDA  4,-1008(4) 	push new frame
-272:    LDA  0,1(7) 	save return address in ac
-273:    LDA  7,-269(7) 	jump to the function
-274:     LD  4,0(4) 	restore frame pointer
+266:     ST  4,-1008(4) 	store old frame pointer
+267:    LDA  4,-1008(4) 	push new frame
+268:    LDA  0,1(7) 	save return address in ac
+269:    LDA  7,-265(7) 	jump to the function
+270:     LD  4,0(4) 	restore frame pointer
 * <-- Calling (input)
-275:     LD  1,-1007(4) 	assign: load id(addr) to ac1
-276:     ST  0,0(1) 	assign: assign expr(ac)->id(ac1)
+271:     LD  1,-1007(4) 	assign: load id(addr) to ac1
+272:     ST  0,0(1) 	assign: assign expr(ac)->id(ac1)
 * <-- Assign
 * --> Assign
+* --> ExprId
+273:    LDC  0,-1002(0) 	ExprId: load id offset to ac
+274:    ADD  0,4,0 	ExprId: fp + offset = base address
+275:    LDA  0,0(0) 	ExprId: load id address
+* <-- ExprId
+276:     ST  0,-1007(4) 	assign: push id(addr) to fp
+* --> Op
 * --> ExprId
 277:    LDC  0,-1002(0) 	ExprId: load id offset to ac
 278:    ADD  0,4,0 	ExprId: fp + offset = base address
-279:    LDA  0,0(0) 	ExprId: load id address
+279:     LD  0,0(0) 	ExprId: load id value
 * <-- ExprId
-280:     ST  0,-1007(4) 	assign: push id(addr) to fp
-* --> Op
-* --> ExprId
-281:    LDC  0,-1002(0) 	ExprId: load id offset to ac
-282:    ADD  0,4,0 	ExprId: fp + offset = base address
-283:     LD  0,0(0) 	ExprId: load id value
-* <-- ExprId
-284:     ST  0,-1008(4) 	op: push operand1 to mp
+280:     ST  0,-1008(4) 	op: push operand1 to mp
 * --> Const
-285:    LDC  0,1(0) 	Const: load val to ac
+281:    LDC  0,1(0) 	Const: load val to ac
 * <-- Const
-286:     LD  1,-1008(4) 	op: load operand1 from mp
-287:    ADD  0,1,0 	op: Plus
+282:     LD  1,-1008(4) 	op: load operand1 from mp
+283:    ADD  0,1,0 	op: Plus
 * <-- Op
-288:     LD  1,-1007(4) 	assign: load id(addr) to ac1
-289:     ST  0,0(1) 	assign: assign expr(ac)->id(ac1)
+284:     LD  1,-1007(4) 	assign: load id(addr) to ac1
+285:     ST  0,0(1) 	assign: assign expr(ac)->id(ac1)
 * <-- Assign
-290:    LDA  7,-45(7) 	Jump to while condition
-259:    JEQ  0,31(7) 	If false, end loop
+286:    LDA  7,-45(7) 	Jump to while condition
+255:    JEQ  0,31(7) 	If false, end loop
 * <-- While
 * --> Assign
 * --> ExprId
-291:    LDC  0,-1005(0) 	ExprId: load id offset to ac
-292:    ADD  0,4,0 	ExprId: fp + offset = base address
-293:    LDA  0,0(0) 	ExprId: load id address
+287:    LDC  0,-1005(0) 	ExprId: load id offset to ac
+288:    ADD  0,4,0 	ExprId: fp + offset = base address
+289:    LDA  0,0(0) 	ExprId: load id address
 * <-- ExprId
-294:     ST  0,-1007(4) 	assign: push id(addr) to fp
+290:     ST  0,-1007(4) 	assign: push id(addr) to fp
 * --> Calling (input)
-295:     ST  4,-1008(4) 	store old frame pointer
-296:    LDA  4,-1008(4) 	push new frame
-297:    LDA  0,1(7) 	save return address in ac
-298:    LDA  7,-294(7) 	jump to the function
-299:     LD  4,0(4) 	restore frame pointer
+291:     ST  4,-1008(4) 	store old frame pointer
+292:    LDA  4,-1008(4) 	push new frame
+293:    LDA  0,1(7) 	save return address in ac
+294:    LDA  7,-290(7) 	jump to the function
+295:     LD  4,0(4) 	restore frame pointer
 * <-- Calling (input)
-300:     LD  1,-1007(4) 	assign: load id(addr) to ac1
-301:     ST  0,0(1) 	assign: assign expr(ac)->id(ac1)
+296:     LD  1,-1007(4) 	assign: load id(addr) to ac1
+297:     ST  0,0(1) 	assign: assign expr(ac)->id(ac1)
 * <-- Assign
 * --> Assign
 * --> ExprId
-302:    LDC  0,-1003(0) 	ExprId: load id offset to ac
+298:    LDC  0,-1003(0) 	ExprId: load id offset to ac
+299:    ADD  0,4,0 	ExprId: fp + offset = base address
+300:    LDA  0,0(0) 	ExprId: load id address
+* <-- ExprId
+301:     ST  0,-1007(4) 	assign: push id(addr) to fp
+* --> Calling (search)
+* --> ExprId
+302:    LDC  0,-2(0) 	ExprId: load id offset to ac
 303:    ADD  0,4,0 	ExprId: fp + offset = base address
 304:    LDA  0,0(0) 	ExprId: load id address
 * <-- ExprId
-305:     ST  0,-1007(4) 	assign: push id(addr) to fp
-* --> Calling (search)
+305:     ST  0,-1010(4) 	store parameter 0
 * --> ExprId
-306:    LDC  0,-2(0) 	ExprId: load id offset to ac
+306:    LDC  0,-1004(0) 	ExprId: load id offset to ac
 307:    ADD  0,4,0 	ExprId: fp + offset = base address
-308:    LDA  0,0(0) 	ExprId: load id address
+308:     LD  0,0(0) 	ExprId: load id value
 * <-- ExprId
-309:     ST  0,-1010(4) 	store parameter 0
+309:     ST  0,-1011(4) 	store parameter 1
 * --> ExprId
-310:    LDC  0,-1004(0) 	ExprId: load id offset to ac
+310:    LDC  0,-1005(0) 	ExprId: load id offset to ac
 311:    ADD  0,4,0 	ExprId: fp + offset = base address
 312:     LD  0,0(0) 	ExprId: load id value
 * <-- ExprId
-313:     ST  0,-1011(4) 	store parameter 1
-* --> ExprId
-314:    LDC  0,-1005(0) 	ExprId: load id offset to ac
-315:    ADD  0,4,0 	ExprId: fp + offset = base address
-316:     LD  0,0(0) 	ExprId: load id value
-* <-- ExprId
-317:     ST  0,-1012(4) 	store parameter 2
-318:     ST  4,-1008(4) 	store old frame pointer
-319:    LDA  4,-1008(4) 	push new frame
-320:    LDA  0,1(7) 	save return address in ac
-321:    LDA  7,-310(7) 	jump to the function
-322:     LD  4,0(4) 	restore frame pointer
+313:     ST  0,-1012(4) 	store parameter 2
+314:     ST  4,-1008(4) 	store old frame pointer
+315:    LDA  4,-1008(4) 	push new frame
+316:    LDA  0,1(7) 	save return address in ac
+317:    LDA  7,-306(7) 	jump to the function
+318:     LD  4,0(4) 	restore frame pointer
 * <-- Calling (search)
-323:     LD  1,-1007(4) 	assign: load id(addr) to ac1
-324:     ST  0,0(1) 	assign: assign expr(ac)->id(ac1)
+319:     LD  1,-1007(4) 	assign: load id(addr) to ac1
+320:     ST  0,0(1) 	assign: assign expr(ac)->id(ac1)
 * <-- Assign
 * --> Calling (output)
 * --> ExprId
-325:    LDC  0,-1003(0) 	ExprId: load id offset to ac
-326:    ADD  0,4,0 	ExprId: fp + offset = base address
-327:     LD  0,0(0) 	ExprId: load id value
+321:    LDC  0,-1003(0) 	ExprId: load id offset to ac
+322:    ADD  0,4,0 	ExprId: fp + offset = base address
+323:     LD  0,0(0) 	ExprId: load id value
 * <-- ExprId
-328:     ST  0,-1009(4) 	store parameter 0
-329:     ST  4,-1007(4) 	store old frame pointer
-330:    LDA  4,-1007(4) 	push new frame
-331:    LDA  0,1(7) 	save return address in ac
-332:    LDA  7,-325(7) 	jump to the function
-333:     LD  4,0(4) 	restore frame pointer
+324:     ST  0,-1009(4) 	store parameter 0
+325:     ST  4,-1007(4) 	store old frame pointer
+326:    LDA  4,-1007(4) 	push new frame
+327:    LDA  0,1(7) 	save return address in ac
+328:    LDA  7,-321(7) 	jump to the function
+329:     LD  4,0(4) 	restore frame pointer
 * <-- Calling (output)
 * --> Return
 * --> Const
-334:    LDC  0,0(0) 	Const: load val to ac
+330:    LDC  0,0(0) 	Const: load val to ac
 * <-- Const
 * <-- Return
 * <- End function body
-335:     LD  7,-1(4) 	return to caller
+331:     LD  7,-1(4) 	return to caller
 * <-- Function (main)
 * End of execution
   2:    LDA  4,-2(6) 	load initial frame pointer
-  3:    LDA  0,332(7) 	set return address to halt
+  3:    LDA  0,328(7) 	set return address to halt
   4:    JEQ  5,222(7) 	jump to main
-336:   HALT  0,0,0 	
+332:   HALT  0,0,0 	

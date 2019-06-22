@@ -1069,25 +1069,281 @@ emitRM("LD", fp, ofpFO, fp, "restore frame pointer");
 - 二分查找
 - 快速排序
 
+提供了三个测试样例`demo/qsort.c, demo/search.c, demo/error.c`，分别演示快排，二分搜索和错误处理。
+
+### 快速排序
+
+以下是快速排序的源代码：
+
+```
+void qsort(int a[], int start, int stop) {
+	int key;
+	int i;
+	int j;
+	int flag;
+    /* test comment */
+	int temp;
+
+	i = start;
+	j = stop;
+	key = a[start];
+	flag = 0;
+
+	while(i < j) {
+		if(flag == 0) {
+			if(a[j] < key) {
+				temp = a[j];
+				a[j] = a[i];
+				a[i] = temp;
+				flag = 1;
+			} else {
+				j = j - 1;
+			}
+		} else {
+			if(a[i] > key) {
+				temp = a[j];
+				a[j] = a[i];
+				a[i] = temp;
+				flag = 0;
+			} else {
+				i = i + 1;
+			}
+		}
+	}
+
+	if(start < stop) {
+		qsort(a, start, i-1);
+		qsort(a, i+1, stop);
+	}
+
+}
 
 
-以下为部分测试样例的源代码与测试结果：
+int main(void) {
 
-**快速排序**
+	int a[10];
+	int i;
+
+	i = 0;
+
+	while(i < 10) {
+		a[i] = input();
+		i = i + 1;
+	}
+
+	qsort(a, 0, 9);
+
+	i = 0;
+
+	while(i < 10) {
+		output(a[i]);
+		i = i + 1;
+	}	
+
+	return 0;
+}
+
+```
 
 
 
+下面介绍一下`qsort.c`的测试方法：
+
+1. 编译代码：`./cminus demo/qsort.c qsort.tm`
+
+2. 运行虚拟机：`./tm qsort.tm`
+
+3. 出现`Enter command:`后，输入`go`
+
+4. 之后会出现十次`Enter value for IN instruction: `。我们任意输入10个数字。例如：
+
+   ```
+   Enter value for IN instruction: 3
+   Enter value for IN instruction: 7
+   Enter value for IN instruction: 2
+   Enter value for IN instruction: 0
+   Enter value for IN instruction: 5
+   Enter value for IN instruction: 3
+   Enter value for IN instruction: 2
+   Enter value for IN instruction: 6
+   Enter value for IN instruction: 7
+   Enter value for IN instruction: 2
+   ```
+
+5. 完成后，程序会输出排序的结果：
+
+   ```
+   OUT instruction prints: 0
+   OUT instruction prints: 2
+   OUT instruction prints: 2
+   OUT instruction prints: 2
+   OUT instruction prints: 3
+   OUT instruction prints: 3
+   OUT instruction prints: 5
+   OUT instruction prints: 6
+   OUT instruction prints: 7
+   OUT instruction prints: 7
+   
+   ```
+
+### 二分搜索
+
+源代码如下：
+
+```C
+int search(int a[], int len, int target) {
+
+	int i;
+	int j;
+	int mid;
+	int loop;
+	int index;
+
+	loop = 1;
+	i = 0;
+	j = len-1;
+	mid = (i + j)/2;
+	index = 1000;
+
+	while(((loop == 1) * (i < j)) == 1) {
+		if(a[mid] == target) {
+			loop = 0;
+			index = mid;
+		} else {
+			if(a[mid] > target) {
+				j = mid;
+				mid = (i + j) / 2;
+			} else {
+				i = mid + 1;
+				mid = (i + j) / 2;
+			}
+		}
+	}
+
+	return index;
+
+}
+
+int main(void) {
+
+	int a[1000];
+	int i;
+	int index;
+
+	int x;
+	int y;
+
+    x = 10;
+	i = 0;
+
+	while(i < x) {
+		a[i] = input();
+		i = i + 1;
+	}
+
+	y = input();
+
+	index = search(a, x, y);
+
+	output(index);
+
+	return 0;
+
+}
+
+```
 
 
 
+下面介绍一下`search.c`的测试方法。这个程序执行二分查找。
+
+1. 编译代码：`./cminus demo/search.c search.tm`
+
+2. 运行虚拟机：`./tm search.tm`
+
+3. 出现`Enter command:`后，输入`go`
+
+4. 之后会出现十次`Enter value for IN instruction: `。我们**从小到大**输入10个数字。例如：
+
+   ```
+   Enter value for IN instruction: 1
+   Enter value for IN instruction: 5
+   Enter value for IN instruction: 7
+   Enter value for IN instruction: 8
+   Enter value for IN instruction: 10
+   Enter value for IN instruction: 14
+   Enter value for IN instruction: 46
+   Enter value for IN instruction: 355
+   Enter value for IN instruction: 677
+   Enter value for IN instruction: 789
+   ```
+
+5. 第十一次，我们输入要查找的数字，例如：
+
+   ```
+   Enter value for IN instruction: 8
+   ```
+
+6. 此时程序就会输出`8`所在的索引位置，即3。如果没找到，会输出1000
 
 
 
+### 错误处理
+
+`demo/error.c`中的代码有诸多错误：
+
+```C
+void hi(int f){
+    int val;
+    {
+        int x;
+        if(f != 0){
+            int x;
+            x = x + 1;
+        }
+    }
+    return val;
+}
 
 
-**二分查找**
+int add(int u, int v){
+    int result;
+    result = 0;
+    result = u + v;
 
+    return ;
+}
 
+int main ( int y, int yes)  {
+    int x;
+    int a[25];
+    int b;
+
+    a = 5;
+    b[1] = 1;
+    add(1);
+    while(hi(x)){
+        x = 2 * x;
+    }
+    x = a[hi(1)];
+
+    x = hi(1) + 1;
+    return a[11]  - 6;
+}
+```
+
+要测试`demo/error.c`，运行`./cminus demo/error.c error.tm`即可。这个C程序有很多错误，编译器会将所有错误都报告：
+
+```
+Error in Line[10]: no return value expected
+Error in Line[19]: Int return value expected
+Error in Line[27]: assignment to an array variable
+Error in Line[28]: index of a non-array variable is invalid
+Error in Line[29]: the number of parameters is inconsistent with declaration
+Error in Line[30]: invalid type in condition: Void
+Error in Line[33]: the index of array should be Int type
+Error in Line[35]: operand's type is invalid: void
+```
 
 
 

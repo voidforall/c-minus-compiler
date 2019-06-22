@@ -26,9 +26,10 @@ $(SRC_DIR)/lex.yy.cpp: $(SRC_DIR)/lexer.l $(DEPS)
 $(SRC_DIR)/parser.tab.h $(SRC_DIR)/parser.tab.cpp: $(SRC_DIR)/parser.y $(DEPS)
 	$(YACC) --defines=$(SRC_DIR)/parser.tab.h $< -o $(SRC_DIR)/parser.tab.cpp
 
+tm:
+	gcc -o tm tm.c
+
 .PHONY: clean
 clean:
-	-rm -f $(OBJS)
-	-rm $(SRC_DIR)/lex.yy.cpp $(SRC_DIR)/parser.tab.h $(SRC_DIR)/parser.tab.cpp
-
-
+	-rm -rf $(OBJS)
+	-rm -rf $(SRC_DIR)/lex.yy.cpp $(SRC_DIR)/parser.tab.h $(SRC_DIR)/parser.tab.cpp

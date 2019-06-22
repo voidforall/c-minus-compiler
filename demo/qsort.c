@@ -5,11 +5,6 @@ void qsort(int a[], int start, int stop) {
 	int flag;
     /* test comment */
 	int temp;
-    /* Yes
-     * THis can be multi
-     * line
-     *
-     */
 
 	i = start;
 	j = stop;
