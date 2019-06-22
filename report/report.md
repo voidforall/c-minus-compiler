@@ -1,5 +1,31 @@
 [TOC]
 
+# 序言
+
+本次课程设计中，本小组实现的是一个基于课程教材附录定义C-minus语言语法的编译器。本C-minus编译器包含了词法分析、语法分析、语义分析、代码生成、代码优化、运行环境等阶段和环节，支持从源代码从分析、生成目标代码以及最终运行的全过程。
+
+在编译器开发过程之中，小组成员使用了Flex/Bison作为词法/语法分析工具，Git作为版本控制系统，分工明确，协作顺利。
+
+
+
+## 文件说明
+
+
+
+
+
+
+
+## 小组分工
+
+袁林：symbol table, type checking, target code
+
+林治轩：scanner, parser, target code
+
+庄稼捷：intermediate code, target code
+
+
+
 # 词法分析
 
 ## 原理简介
@@ -773,6 +799,8 @@ t0 = 1;
 
 在目标代码生成部分，我们小组选用的是课程教材上提供的TINY语言的目标代码。由于课后附录部分提供了TINY语言的一个virtual machine，生成的目标代码可以在tiny machine上实际运行。
 
+本小节后续将会介绍Tiny目标代码的文法、寄存器设定，C-minus语言使用的运行时环境，具体实现中的接口定义，各个结点类型对应的目标代码。
+
 
 
 ## 目标代码文法与运行时环境
@@ -821,6 +849,8 @@ int f(int x, int y)
 
 ## 具体实现
 
+### 数据结构
+
 在生成目标代码的过程中，同时需要查询当前scope内的符号表信息，以分配当前活动记录内的内存空间，因此声明`fun`和`track`类如下：
 
 ```c++
@@ -843,6 +873,120 @@ public:
 在`track`中记录了遍历语法树时当前的作用域`current_scope`和函数记录`funs`，如需查找当前符号表中对某一个符号分配的内存空间，可直接使用`st_lookup(current_scope, id)` 获取其在符号表中的位置。
 
 
+
+###接口定义
+
+在将目标代码写入目标代码文件`filename.tm`时，我们使用了教材附录中`code.c`中提供的函数接口，其能够在编写`gentiny`模块时为开发者提供方便的目标代码生成的接口调用。
+
+`code.h`中的接口函数如下：
+
+```c++
+/* code emitting utilities */
+
+/* Procedure emitComment prints a comment line 
+ * with comment c in the code file
+ */
+void emitComment( const char * c );
+
+/* Procedure emitRO emits a register-only
+ * TM instruction
+ * op = the opcode
+ * r = target register
+ * s = 1st source register
+ * t = 2nd source register
+ * c = a comment to be printed if TraceCode is TRUE
+ */
+void emitRO( const char *op, int r, int s, int t, const char *c);
+
+/* Procedure emitRM emits a register-to-memory
+ * TM instruction
+ * op = the opcode
+ * r = target register
+ * d = the offset
+ * s = the base register
+ * c = a comment to be printed if TraceCode is TRUE
+ */
+void emitRM( const char * op, int r, int d, int s, const char *c);
+
+/* Function emitSkip skips "howMany" code
+ * locations for later backpatch. It also
+ * returns the current code position
+ */
+int emitSkip(int howMany);
+
+/* Procedure emitBackup backs up to 
+ * loc = a previously skipped location
+ */
+void emitBackup(int loc);
+
+/* Procedure emitRestore restores the current 
+ * code position to the highest previously
+ * unemitted position
+ */
+void emitRestore(void);
+
+/* Procedure emitRM_Abs converts an absolute reference 
+ * to a pc-relative reference when emitting a
+ * register-to-memory TM instruction
+ * op = the opcode
+ * r = target register
+ * a = the absolute location in memory
+ * c = a comment to be printed if TraceCode is TRUE
+ */
+void emitRM_Abs(const char *op, int r, int a, const char * c);
+```
+
+以上函数对于写目标代码文件作用如下：
+
+- `emitComment`：在tm文件中写入参数中的字符串作为注释内容；
+- `emitRO`：在目标代码文件中写入RO类型的指令；
+- `emitRM`：在目标代码文件中写入RM类型的指令；
+- `emitSkip`：在目标代码文件中跳过参数指定数目的行数，可能用于之后的反填；常见用法如：emitSkip(1)跳过一个位置，通常之后填上转移指令；
+  emitSkip(0)不跳过位置，但可以得到当前位置已备之后的转移指令引用；
+- `emitBackup`：设置当前指令位置到先前的位置反填；
+- `emitRestore`：返回当前指令位置给先前调用emitBackup的值；
+- `emitRM_Abs`：将绝对地址转换为pc-relevant的转移指令；
+
+
+
+gentiny.h中对于target code的函数声明如下：
+
+```c++
+void gentiny(Node * tree);
+void gentiny_code(Node * tree, track & track);
+
+// DeclType : Var, Fun
+void gentiny_decl(DeclNode * tree, track & track);
+void gentiny_decl_var(VarDeclNode * node, track & track);
+void gentiny_decl_fun(FunDeclNode * node, track & track);
+
+// ExprType : Assign, Call, Op, Const, Id
+void gentiny_expr(ExprNode * tree, track & track, bool isAddress=false);
+void gentiny_expr_assign(AssignExprNode * node, track & track);
+void gentiny_expr_call(CallExprNode * node, track & track);
+void gentiny_expr_op(OpExprNode * node, track & track);
+void gentiny_expr_const(ConstExprNode * node, track & track);
+void gentiny_expr_id(IdExprNode * node, track & track, bool isAddress);
+
+// StmtType : ExprStmt, If, Iter, Return, Compound
+void gentiny_stmt(StmtNode * tree, track & track);
+void gentiny_stmt_expr(ExprStmtNode * node, track & track);
+void gentiny_stmt_if(IfStmtNode * node, track & track);
+void gentiny_stmt_iter(IterStmtNode * node, track & track);
+void gentiny_stmt_return(ReturnStmtNode * node, track & track);
+void gentiny_stmt_compound(CompoundStmtNode * node, track & track);
+```
+
+其中部分接口的作用如下：
+
+- `gentiny(Node * tree)`：gentiny模块对外接口，完成一系列初始化工作并调用`gentiny_code` 实际生成目标代码并写入目标代码文件；
+- `gentiny_code(Node * tree, track & track)`：生成目标代码的函数接口，根据结点类型选择调用相应类型对应的目标代码生成函数；
+- `gentiny_decl/expr/stmt`：生成目标代码对于`NodeType `的接口函数，通过判断当前`Node`的`DeclType`/`ExprType`和`StmtType`调用实际真正产生目标代码的函数；
+- 其余函数为具体的目标代码生成功能函数，如`gentiny_stmt_iter`函数生成`IterStmtNode`对应的目标代码；
+
+
+
+### 不同语句对应实现
 
 对一段语法树的结构，需要在该模块中实现相应的到目标代码的translation，并将目标代码写入目标代码文件，下面以function call过程对应的目标代码为例：
 
@@ -881,23 +1025,13 @@ emitRM("LD", fp, ofpFO, fp, "restore frame pointer");
 
 
 
+
+
 ### 示例
 
 仍然以之前语法分析和语义分析中的代码为源代码。由于其生成的目标代码太长且不便于阅读，这里仅以部分生成的目标代码作为示例参考：
 
 ![f19-tac-example](pics/f19-tac-example.png)
-
-
-
-
-
-# 项目分工
-
-林治轩：scanner, parser, target code
-
-庄稼捷：intermediate code, target code
-
-袁林：symbol table, type checking, target code
 
 
 
