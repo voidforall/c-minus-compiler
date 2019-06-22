@@ -408,7 +408,7 @@ Func: int main
 
 在C--中，由于变量有着作用域的限制，符号表的设计也需要做出相应的调整。如下图所示，随着嵌套定义的作用域scope，多个symbol table构成了一个树状的拓扑结构：
 
-![symbol-table-structure](C:\Users\10750\Desktop\Junior\编译原理\C--compiler\C-minus-compiler\report\pics\f12-symbol-table-tree.png)
+![symbol-table-structure](pics\f12-symbol-table-tree.png)
 
 首先，需要定义symbol table的一个索引项BucketListRec类：
 
@@ -474,7 +474,7 @@ typedef ScopeRec* Scope;
 
 可以将其对应的符号表打印如下：
 
-![f13-symbol-table-sample](C:\Users\10750\Desktop\Junior\编译原理\C--compiler\C-minus-compiler\report\pics\f13-symbol-table-sample.png)
+![f13-symbol-table-sample](pics\f13-symbol-table-sample.png)
 
 
 
@@ -504,9 +504,9 @@ typedef ScopeRec* Scope;
 
 以下为一个包含了较多类型错误的代码段在type checking后的反馈结果：
 
-![f14-type-error-sample](C:\Users\10750\Desktop\Junior\编译原理\C--compiler\C-minus-compiler\report\pics\f14-type-error-sample.png)
+![f14-type-error-sample](pics\f14-type-error-sample.png)
 
-![f15-type-error-result](C:\Users\10750\Desktop\Junior\编译原理\C--compiler\C-minus-compiler\report\pics\f15-type-error-result.png)
+![f15-type-error-result](pics\f15-type-error-result.png)
 
 从上面的结果可以看出，type checking可以检查出上面定义的错误类型，并给程序编写者准确无误的反馈结果。
 
