@@ -476,6 +476,14 @@ typedef ScopeRec* Scope;
 
 ![f13-symbol-table-sample](pics/f13-symbol-table-sample.png)
 
+下图可以表现对应的语法树和符号表结构关系：
+
+![f18-symtab-tree](pics/f18-symtab-tree.png)
+
+在已有的语法树结构之外，每个自带scope的结点(即所有的FunDeclNode和CompoundNode)会有一个指向scope结构的指针，对应了其所在作用域的符号表；
+
+scope之间由于存在嵌套关系，因此每个scope会有指向其父作用域的指针，如上图所示，当在一个符号表中lookup某个变量名而没有找到时，会根据就近原则查找其父符号表。
+
 
 
 ## 类型检查
@@ -754,4 +762,146 @@ t2 = &a + t1;
 t0 = 1;
 *t2 = t0;
 ```
+
+
+
+# 目标代码生成
+
+## 原理简介
+
+相比于中间代码生成，目标代码(target code)生成的是如x86、MIPS这样能在实际机器上运行的目标机器汇编代码。其中涉及到比中间代码更多的细节，诸如：寄存器分配、运行环境的考量、内存空间的分配、运行时栈的结构等等。
+
+在目标代码生成部分，我们小组选用的是课程教材上提供的TINY语言的目标代码。由于课后附录部分提供了TINY语言的一个virtual machine，生成的目标代码可以在tiny machine上实际运行。
+
+
+
+## 目标代码文法与运行时环境
+
+### TINY目标代码
+
+TINY语言的目标代码完全指令集如下图所示：
+
+![f16-tac-grammar](pics/f16-tac-grammar.png)
+
+对于对汇编语言有一定经验的人，显然这个指令集并不难理解，其可以看作是一个完整指令集的简化版本，但仍然有着完备的计算功能。下面是这个目标代码指令集的一些细节：
+
+- 7条RO指令(register-register)
+- 10条RM指令(register-memory)
+- 8个寄存器，包含了以下专用寄存器：
+  - reg[0] - ac, reg[1] - ac1, 用作数值计算时的累加器
+  - reg[4] - fp，帧指针(frame pointer)
+  - reg[5] - gp，全局指针(global pointer)
+  - reg[6] - mp，内存指针(memory pointer)
+  - reg[7] - pc，程序计数器(program counter)
+- 包括了built-in的I/O指令(IN/OUT)
+
+
+
+### TINY Machine运行时环境
+
+因为C-minus支持函数调用和返回，那么一个基于栈结构的runtime envrionment也是必不可少的，下图显示了C-minus中的帧结构/活动记录：
+
+![f17-frame-structure](pics/f17-frame-structure.png)
+
+这里fp是当前结构指针(current frame pointer)，为便于访问保存在4号寄存器中。ofp(旧结构指针)是课程中讨论过的控制链(control link)。FO右端的0、-1、-2是每个存储值的偏移量。参数、局部变量等都已经在当前活动记录绑定的符号表中分配了虚拟地址。
+
+例如，若有一段C-minus函数的声明如下：
+
+```c++
+int f(int x, int y)
+{
+    int z;
+    ...
+}
+```
+
+则x，y，z必须在当前活动记录结构中分配，x、y和z的偏移量分别为-2、-3和-4。其中x与y是在params field，而z是在local vars field。
+
+
+
+## 具体实现
+
+在生成目标代码的过程中，同时需要查询当前scope内的符号表信息，以分配当前活动记录内的内存空间，因此声明`fun`和`track`类如下：
+
+```c++
+class fun {
+public:
+    string fun_name;
+    int index;
+    fun(string fun_name, int index);
+};
+
+class track {
+public:
+    Scope current_scope;
+    vector<fun> funs;
+    void add_func(string id, int index);
+    int find_func(string id);
+};
+```
+
+在`track`中记录了遍历语法树时当前的作用域`current_scope`和函数记录`funs`，如需查找当前符号表中对某一个符号分配的内存空间，可直接使用`st_lookup(current_scope, id)` 获取其在符号表中的位置。
+
+
+
+对一段语法树的结构，需要在该模块中实现相应的到目标代码的translation，并将目标代码写入目标代码文件，下面以function call过程对应的目标代码为例：
+
+```c++
+// frame offset is the current stack pointer
+// compute arguments
+int param_offset = 0;
+for (Node * param = node->children[0]; param != nullptr; param = param->next) {
+    // param is a exp node
+    gentiny_code(param, track);
+    // after this, result will be stored in ac. Store this
+    sprintf(buffer, "store parameter %d", param_offset);
+    emitRM("ST", ac, frame_offset + initFO - param_offset, fp, buffer);
+    param_offset += 1;
+}
+
+// store old frame pointer
+emitRM("ST", fp, frame_offset + ofpFO, fp, "store old frame pointer");
+// push new frame
+emitRM("LDA", fp, frame_offset, fp, "push new frame");
+// save return in ac
+emitRM("LDA", ac, 1, pc, "save return address in ac");
+// jump. This uses the global address of the function
+emitRM_Abs("LDA", pc, track.find_func(node->id), "jump to the function");
+
+// after call done, pop current frame. At this point, fp is the new fp
+emitRM("LD", fp, ofpFO, fp, "restore frame pointer");
+```
+
+在调用函数时，经历了以下几步目标代码的生成：
+
+1. 计算arguments，并用ST指令将其写入活动记录中的params field；
+2. 存储旧的帧指针、将新的帧指针压栈并存储return address；
+3. 将pc改为函数声明所在位置，从而jump到函数起始位置；
+4. 在执行完函数体中的语句之后，弹出栈当前frame；
+
+
+
+### 示例
+
+仍然以之前语法分析和语义分析中的代码为源代码。由于其生成的目标代码太长且不便于阅读，这里仅以部分生成的目标代码作为示例参考：
+
+![f19-tac-example](pics/f19-tac-example.png)
+
+
+
+
+
+# 项目分工
+
+林治轩：scanner, parser, target code
+
+庄稼捷：intermediate code, target code
+
+袁林：symbol table, type checking, target code
+
+
+
+
+
+
 
