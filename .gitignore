@@ -11,6 +11,4 @@ parser.tab.hpp
 parser
 result.tac
 test.tm
-tm
 *.o
-cminus

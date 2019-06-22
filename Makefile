@@ -32,5 +32,6 @@ tm:
 .PHONY: clean
 clean:
 	-rm -rf $(OBJS)
-	-rm -rf $(SRC_DIR)/lex.yy.cpp $(SRC_DIR)/parser.tab.h $(SRC_DIR)/parser.tab.cpp
-	-rm cminus
+	-rm -rf $(SRC_DIR)/lex.yy.cpp $(SRC_DIR)/parser.tab.h $(SRC_DIR)/parser.tab.cpp 
+	-rm -rf cminus
+	-rm -rf tm
