@@ -33,3 +33,4 @@ tm:
 clean:
 	-rm -rf $(OBJS)
 	-rm -rf $(SRC_DIR)/lex.yy.cpp $(SRC_DIR)/parser.tab.h $(SRC_DIR)/parser.tab.cpp
+	-rm cminus
