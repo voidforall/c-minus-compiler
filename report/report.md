@@ -10,9 +10,22 @@
 
 ## 文件说明
 
-
-
-
+- `src`文件夹下包括了工程的源代码，具体组织如下：
+  - `globals.h` `globals.cpp` 包括了全局类型的声明，如`Node`与其继承类；
+  - `lexer.l`为词法分析的lex代码；
+  - `parser.y `为语法分析的yacc代码；
+  - `symtab.h` `symtab.cpp` 声明了符号表与作用域与包括插入、查询在内的基本操作；
+  - `analyze.h` `analyze.cpp` 实现了建立符号表、类型检查在内的语义分析；
+  - `gencode.h` `gencode.cpp` 实现了利用语法树生成三地址码的中间代码生成；
+  - `code.h` `code.cpp` 为tiny machine中写目标代码的函数接口；
+  - `util.h` `util.cpp` 实现了部分辅助函数；
+  - `gentiny.h` `gentiny.cpp` 实现了以tiny机器目标代码作为目标代码的生成；
+- `demo`文件夹下包括了工程提供的测试样例，具体内容如下：
+  - `error.c` 包括了大部分常见错误，用作错误处理的样例代码；
+  - `test2.c` `test3.c` `test4.c` 测试了一般的语句功能、函数声明与调用功能；
+  - `vis.c` 测试了I/O的处理；
+  - `qsort.c` 为一个快速排序样例代码；
+  - `search.c` 为一个二分搜索样例代码；
 
 
 
@@ -992,19 +1005,44 @@ void gentiny_stmt_compound(CompoundStmtNode * node, track & track);
 
 对一段语法树的结构，需要在该模块中实现相应的到目标代码的translation，并将目标代码写入目标代码文件。
 
+具体调用关系可参考上一小节gentiny.h的函数接口，在生成目标代码时，根据当前`Node`的不同类型，程序会选择调用不同的生成函数。
 
+在每个函数的参数中，包含了对应语句在语法树中的结点和`track`结构，track中包含了当前语句所在作用域的符号表。在函数中利用这些信息，调用code.cpp中提供的写目标代码接口函数，即可实现不同语句到目标代码的转换。
 
-
-
-
+下面以在C-minus的目标代码生成模块中最重要的部分-函数声明和函数调用为例说明具体实现：
 
 
 
 #### 函数声明
 
+核心代码段如下：
 
+```c++
+// record function location
+track.add_func(node->id, emitSkip(0));
 
+emitRM("ST", ac, retFO, fp, "save return address in fp + retFO");
 
+// generate code for the body
+// some setups
+track.current_scope = node->scope;
+// modify stack pointer
+frame_offset = initFO - param_offset(dynamic_cast<VarDeclNode *>(node->children[0]));
+
+// actually generate the code
+Node * body = node->children[1];
+gentiny_code(body, track);
+
+emitRM("LD", pc, retFO, fp, "return to caller");
+```
+
+在处理函数声明时，包含了以下几个步骤：
+
+1. 在track对象中注册当前函数；
+2. 将return address(存储在ac中)存储在活动记录中的指定位置；
+3. 获取当前函数所在的scope并计算帧结构内的偏移量；
+4. 调用`gentiny_code`函数以生成函数体的目标代码；
+5. 利用LD指令将return address 加载到pc寄存器中以返回caller的调用地址；
 
 
 
