@@ -12,6 +12,6 @@ parser
 result.tac
 test.tm
 tm
-build
+build/*
 *.o
 cminus
