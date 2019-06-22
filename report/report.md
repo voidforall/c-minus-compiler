@@ -381,6 +381,135 @@ Func: int main
               Id: b
 ```
 
+# 语义分析
+
+## 原理简介
+
+语义分析(semantic analysis)的任务是计算编译过程所需的附加信息。因为编译器完成的分析是静态(在执行之前发生)定义的，语义分析也可以称为静态语义分析(static semantic analysis)。
+
+一般的，语义分析包括了构造符号表、记录声明中建立的名字的含义、在表达式和与剧中进行类型推断和类型检查以及在语言的类型规则作用域内判断它们的正确性。
+
+在C--语言的语义分析中，主要包括了符号表的建立和类型检查两部分，类型检查可以检测出大部分错误类型并作出相应的error report。
+
+## 符号表设计
+
+### 概览
+
+语义分析中最重要的部分是符号表(symbol table)，符号表中维护了所有在程序段中定义的符号信息，包括了符号名、类型、内存虚拟地址、所在行号等信息。同时，在C--中，需要通过特殊的组织结构将作用域信息与符号表设计结合。
+
+在做类型检查的过程之中，需要查找符号表，并将计算出的类型属性更新到符号表之中。在生成目标代码的过程之中，变量内存空间的分配需要通过查表得到其内存虚拟地址来计算。在整个编译流程中，符号表的作用都是不可替代的。
+
+符号表的基本数据结构是hash table，实现细节如下：
+
+- separate chaining
+- hash function: $h_0 = 0$，$h_{i-1} = \alpha h_i - c_i$，其中$c_i$为symbol name字符串第i个字符的数字值
+
+### 数据结构
+
+在C--中，由于变量有着作用域的限制，符号表的设计也需要做出相应的调整。如下图所示，随着嵌套定义的作用域scope，多个symbol table构成了一个树状的拓扑结构：
+
+![symbol-table-structure](C:\Users\10750\Desktop\Junior\编译原理\C--compiler\C-minus-compiler\report\pics\f12-symbol-table-tree.png)
+
+首先，需要定义symbol table的一个索引项BucketListRec类：
+
+```c++
+class BucketListRec {
+public:
+	// data members
+	string id;
+	vector<int> lines;
+	Node *node;
+	int memloc;
+	BucketListRec *next;
+
+	// methods
+	BucketListRec(string _id, Node *_node, int _memloc) {
+		id = _id; node = _node; memloc = _memloc;
+	};
+};
+typedef vector<BucketListRec> BucketList;
+```
+
+各个field的含义如下：
+
+- `id`: symbol name，对于变量而言是变量名，对于函数而言是函数名；
+- `lines`: 行号，记录了该变量出现的所有所在行的位置信息；
+- `node`：指向syntax tree结点的指针，对于每个symbol都指向了其varDeclNode，便于之后的操作和修改；
+- `memloc`：内存地址，在符号表内对当前scope所有的符号分配了虚拟的内存地址，便于生成目标代码时分配内存空间；
+- `next`：在separate chaining中用于存储发生collision时的下一个BucketListRec；
+
+定义`vector<BucketListRec>`为`BucketList`类型，代表了symbol table中同一hash value的list。
+
+由于每一张符号表需要和一个作用域Scope相绑定，定义类scope如下：
+
+```c++
+/* The record of scope, maintaining one symbol table each */
+class ScopeRec {
+public:
+	// data members
+	string scopeName;
+	int nestedLevel;
+	ScopeRec *parentScope;
+	/* symbol table of this scope*/
+	BucketList hashTable[HASH_TABLE_SIZE];
+
+	// methods
+	ScopeRec(string _scopeName) { scopeName = _scopeName; };
+};
+typedef ScopeRec* Scope;
+```
+
+其中各个field的含义如下：
+
+- `scopeName`：作用域名称，一般为所在函数名称；
+- `nestedLevel`：嵌套的层数，如main函数内为第一层，main之内的compound语句为第二层；
+- `parentScope`：指向其父scope的指针，用于在搜索时向上搜索最近的symbol；
+- `hashTable`：该scope对应的符号表
+
+### 示例
+
+同样以语法树中的样例程序为例：
+
+![f9-example-code](pics/f9-example-code.png)
+
+可以将其对应的符号表打印如下：
+
+![f13-symbol-table-sample](C:\Users\10750\Desktop\Junior\编译原理\C--compiler\C-minus-compiler\report\pics\f13-symbol-table-sample.png)
+
+
+
+## 类型检查
+
+### 概览
+
+除了建立符号表外，语义分析的另一个重要任务是对程序中的类型属性进行类型检查(type checking)。类型(type)可以看作是符号的一个属性(attribute)，类型检查的过程也是属性计算(attribute calculation)的过程。
+
+在建立符号表时，我们的方法是对语法树进行前序遍历(pre-order traversal)，这是因为需要在作为scope结点的根节点先确立该scope的符号表，才能向符号表中插入这个scope下的符号信息；而在做类型检查的时候，需要对语法树进行后序遍历(post-order traversal)，计算出子节点的类型后才好进行类型检查，如果类型上出现错误，需要打印适当的报错信息。
+
+
+
+### 错误类型
+
+错误类型基本包含了所有C--程序能在语义分析阶段检测出的错误，如：
+
+- Array without index used as left value
+- Function call inconsistent with declaration
+- Wrong type of return value of a function
+- Any wrong type in assignment statements
+- ...
+
+
+
+### 示例
+
+以下为一个包含了较多类型错误的代码段在type checking后的反馈结果：
+
+![f14-type-error-sample](C:\Users\10750\Desktop\Junior\编译原理\C--compiler\C-minus-compiler\report\pics\f14-type-error-sample.png)
+
+![f15-type-error-result](C:\Users\10750\Desktop\Junior\编译原理\C--compiler\C-minus-compiler\report\pics\f15-type-error-result.png)
+
+从上面的结果可以看出，type checking可以检查出上面定义的错误类型，并给程序编写者准确无误的反馈结果。
+
 
 
 # 中间代码生成
